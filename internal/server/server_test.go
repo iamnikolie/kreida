@@ -154,6 +154,12 @@ func TestEditorAPIBoardsLifecycle(t *testing.T) {
 
 	h.put("two", "title: Second\nnodes: { a: A }\n")
 
+	// Consecutive writes can have the same mtime. Set distinct times to test recency order.
+	older := time.Unix(1700000000, 0)
+	newer := older.Add(time.Minute)
+	require.NoError(t, os.Chtimes(h.paths.BoardFile("new1"), older, older))
+	require.NoError(t, os.Chtimes(h.paths.BoardFile("two"), newer, newer))
+
 	list := h.get("/api/boards")
 	assert.Equal(t, 200, list.status)
 
