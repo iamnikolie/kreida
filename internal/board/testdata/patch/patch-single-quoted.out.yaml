@@ -1,0 +1,29 @@
+# board header comment
+title: T # trailing on title
+
+sub: ""
+direction: LR
+legend: { src: In, core: Do }
+
+# nodes come next
+nodes:
+  # first card
+  a: { title: Alpha, text: one, kind: src } # inline comment
+  b: "Bee | two"
+  c: Просто карточка | без цвета
+
+  d:
+    title: Delta # delta title
+    text: four
+    kind: core
+  e:
+    kind: core
+  f: { kind: src }
+  g:
+  h: ~
+  i: 'x | quoted'
+edges:
+  - a -> b # edge comment
+  - b -> c
+
+# trailing comment

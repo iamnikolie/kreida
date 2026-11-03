@@ -1,0 +1,114 @@
+{
+  "title": "Title: with colon",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "options",
+      "title": "Варианты",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null,
+      "cols": [
+        "Вариант",
+        "Цена",
+        "Скорость запуска",
+        "Риск"
+      ],
+      "rows": [
+        [
+          {
+            "text": "n8n"
+          },
+          {
+            "text": "$20/мес",
+            "score": 2
+          },
+          {
+            "text": "неделя",
+            "score": 1
+          },
+          {
+            "text": "средний",
+            "score": 0
+          }
+        ],
+        [
+          {
+            "text": "Zapier"
+          },
+          {
+            "text": "$70/мес",
+            "score": -1
+          },
+          {
+            "text": "два дня",
+            "score": 2
+          },
+          {
+            "text": "низкий",
+            "score": 1
+          }
+        ],
+        [
+          {
+            "text": "Свой код"
+          },
+          {
+            "text": "$0",
+            "score": 2
+          },
+          {
+            "text": "месяц",
+            "score": -1
+          },
+          {
+            "text": "высокий",
+            "score": -1
+          }
+        ]
+      ]
+    },
+    {
+      "id": "pick",
+      "title": "Решение",
+      "text": "**n8n**: дёшево и хватит на год.\n- Zapier, если нужно к пятнице\n- свой код потом",
+      "kind": "note",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-options-pick",
+      "from": "options",
+      "to": "pick",
+      "label": ""
+    }
+  ],
+  "steps": [],
+  "questions": [
+    {
+      "text": "Какой бюджет в месяц?"
+    },
+    {
+      "text": "Когда нужен запуск",
+      "on": "pick"
+    }
+  ]
+}

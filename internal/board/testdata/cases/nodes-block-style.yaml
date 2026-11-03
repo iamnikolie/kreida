@@ -1,0 +1,11 @@
+nodes:
+  a:
+    title: Block form
+    text: second
+    kind: src
+    group: g
+    live:
+      cmd: echo ok
+      every: 10
+groups:
+  g: Group

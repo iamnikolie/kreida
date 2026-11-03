@@ -1,0 +1,21 @@
+title: "Title: with colon"
+sub: → чтобы показать шаги
+direction: LR
+legend: { warn: Боль сейчас, core: Делает ассистент, out: Результат }
+groups:
+  now: Сейчас
+  next: С ассистентом
+nodes:
+  in: { title: Запрос клиента, kind: who }
+  n1: { title: Читает вручную, text: вечером, kind: warn, group: now }
+  n2: { title: Ищет по таблицам, text: 30 минут, kind: warn, group: now }
+  n3: { title: Отвечает, group: now }
+  a1: { title: Ассистент разбирает, text: сразу, kind: core, group: next, icon: bot }
+  a2: { title: Готовит подборку, text: 2 минуты, kind: core, group: next }
+  a3: { title: Человек жмёт «ОК», kind: out, group: next }
+edges:
+  - in -> n1 -> n2 -> n3
+  - in -> a1 -> a2 -> a3
+steps:
+  - { title: Сейчас, show: [now] }
+  - { title: С ассистентом, show: [next], hide: [now] }

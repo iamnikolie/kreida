@@ -1,0 +1,4 @@
+{
+  "yaml": true,
+  "message": "yaml: line 1: key \"a\" appears twice in one map"
+}

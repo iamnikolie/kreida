@@ -1,0 +1,9 @@
+flowchart LR
+  subgraph A["A"]
+    m1["Bold<br/>→ B"]
+  end
+  subgraph B["B"]
+    m2["quoted<br/>→ A"]:::p2
+  end
+  m1 --> m2
+  classDef p2 stroke:#9b968c,stroke-width:1.6px,stroke-dasharray:5 4

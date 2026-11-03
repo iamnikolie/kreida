@@ -1,0 +1,12 @@
+nodes:
+  a:
+    {
+      title: Alpha,
+      text: two,
+      kind: src,
+      group: some-long-group-name,
+      icon: send,
+      width: 320,
+      step: 12
+    }
+  b: B

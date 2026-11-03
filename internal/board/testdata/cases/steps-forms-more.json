@@ -1,0 +1,100 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "g",
+      "label": "G",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "A",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b",
+      "title": "B",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [],
+  "steps": [
+    {
+      "title": "",
+      "show": [
+        "a"
+      ],
+      "hide": []
+    },
+    {
+      "title": "",
+      "show": [
+        "a",
+        "b"
+      ],
+      "hide": [
+        "g"
+      ]
+    },
+    {
+      "title": "5",
+      "show": [
+        "a",
+        "b"
+      ],
+      "hide": []
+    },
+    {
+      "title": "",
+      "show": [],
+      "hide": [
+        "a"
+      ]
+    },
+    {
+      "title": "",
+      "show": [],
+      "hide": []
+    },
+    {
+      "title": "",
+      "show": [
+        "a"
+      ],
+      "hide": []
+    },
+    {
+      "title": "",
+      "show": [
+        "a",
+        "b"
+      ],
+      "hide": []
+    }
+  ]
+}

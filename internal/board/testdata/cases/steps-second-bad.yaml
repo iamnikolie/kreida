@@ -1,0 +1,4 @@
+nodes: { a: A }
+steps:
+  - a
+  - b

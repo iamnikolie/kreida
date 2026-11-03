@@ -1,0 +1,39 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "g",
+      "label": "Group",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "Block form",
+      "text": "second",
+      "kind": "src",
+      "group": "g",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": {
+        "source": "cmd:echo ok",
+        "every": 10,
+        "path": null,
+        "label": ""
+      }
+    }
+  ],
+  "edges": [],
+  "steps": []
+}

@@ -1,0 +1,48 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "a",
+      "label": "A",
+      "kind": null,
+      "direction": "LR",
+      "parent": null
+    },
+    {
+      "id": "b",
+      "label": "B",
+      "kind": null,
+      "direction": "RL",
+      "parent": null
+    },
+    {
+      "id": "c",
+      "label": "C",
+      "kind": null,
+      "direction": "TB",
+      "parent": null
+    },
+    {
+      "id": "d",
+      "label": "D",
+      "kind": null,
+      "direction": "BT",
+      "parent": null
+    },
+    {
+      "id": "e",
+      "label": "E",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [],
+  "edges": [],
+  "steps": []
+}

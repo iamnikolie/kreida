@@ -1,0 +1,5 @@
+groups:
+  - { id: g1, label: One }
+  - { id: g2, title: Two }
+  - plain
+  - { label: no id }

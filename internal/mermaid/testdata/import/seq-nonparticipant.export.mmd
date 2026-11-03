@@ -1,0 +1,10 @@
+flowchart LR
+  subgraph A["A"]
+    m1["x<br/>→ B"]
+    m3["with: colon<br/>→ B"]
+  end
+  subgraph B["B"]
+    m2["…<br/>→ A"]
+  end
+  m1 --> m2
+  m2 --> m3

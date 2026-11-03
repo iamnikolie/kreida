@@ -1,0 +1,12 @@
+.tools { display: flex; gap: 2px; padding: 4px; border-radius: 12px; background: var(--panel); box-shadow: var(--shadow);
+  backdrop-filter: blur(8px); }
+.tools button { all: unset; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; color: var(--pill-fg); cursor: pointer; }
+.tools button:hover, .tools button.on { background: color-mix(in srgb, var(--edge) 18%, transparent); color: var(--fg); }
+/* the view-only lock: an icon with its word, so the state reads at a glance */
+.tools button.lock { width: auto; display: flex; gap: 6px; padding: 0 10px 0 9px; font: 500 12.5px/1 "IBM Plex Sans", -apple-system, system-ui, sans-serif; }
+.tools button.lock.on { color: var(--fg); background: color-mix(in srgb, var(--src) 16%, transparent); }
+/* fold levels: a small group of its own */
+.fold-levels { display: flex; align-items: center; gap: 1px; padding-left: 6px; margin-left: 2px; border-left: 1px solid var(--zone-line); }
+.fold-levels .fold-ic { color: var(--muted); margin-right: 2px; }
+.fold-levels button { width: 26px; }
+.fold-levels .lv { font: 600 12.5px/1 "IBM Plex Sans", -apple-system, system-ui, sans-serif; }

@@ -1,0 +1,8 @@
+nodes:
+  a1: { title: Анкета в Telegram, text: "тема, описание", kind: src, group: s1, icon: send }
+  b1: { title: "Заводит карточку | проверяет дубли", kind: core, group: s1 }
+  reviewer: { title: Редактор, kind: who }
+  idea: Просто карточка | без цвета
+  w: { title: Wide, width: 320, shape: pill, step: 2 }
+groups:
+  s1: { label: Новая запись, direction: LR }

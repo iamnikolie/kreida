@@ -1,0 +1,92 @@
+{
+  "title": "Title: with colon",
+  "sub": "что делать первым",
+  "direction": "LR",
+  "layout": "matrix",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "Шаблоны ответов",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null,
+      "x": "low",
+      "y": "high"
+    },
+    {
+      "id": "b",
+      "title": "Своя CRM",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null,
+      "x": "high",
+      "y": "high"
+    },
+    {
+      "id": "c",
+      "title": "Новый логотип",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null,
+      "x": "low",
+      "y": "low"
+    },
+    {
+      "id": "d",
+      "title": "Переезд на другой сервер",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null,
+      "x": "high",
+      "y": "low"
+    }
+  ],
+  "edges": [],
+  "steps": [],
+  "matrix": {
+    "x": {
+      "label": "Усилия",
+      "low": "мало",
+      "high": "много"
+    },
+    "y": {
+      "label": "Эффект",
+      "low": "слабый",
+      "high": "сильный"
+    },
+    "hot": "low-high",
+    "quadrants": {
+      "high-high": "Большие ставки",
+      "high-low": "Не сейчас",
+      "low-high": "Быстрые победы",
+      "low-low": "Мелочи"
+    }
+  }
+}

@@ -1,0 +1,3 @@
+nodes:
+  cities: { fields: [id, name] }
+  models: { fields: [id, "city_id -> cities | note", "agency_id -.-> agencies"] }

@@ -1,0 +1,3 @@
+title: !!str 123
+sub: !!int "5"
+nodes: { a: !!str 5 }

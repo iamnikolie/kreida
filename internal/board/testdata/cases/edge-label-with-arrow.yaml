@@ -1,0 +1,3 @@
+edges:
+  - "a -> b: see x -> y"
+  - "c -> d: http://example.com/x"

@@ -1,0 +1,6 @@
+nodes:
+  - { id: a, title: A }
+  - { id: b, title: B, kind: src }
+  - plain card
+  - { title: no id }
+  - ~

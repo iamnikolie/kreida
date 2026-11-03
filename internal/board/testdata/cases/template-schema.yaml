@@ -1,0 +1,9 @@
+title: "Title: with colon"
+sub: стрелка = «один ко многим»
+direction: LR
+legend: { src: Уже есть, core: Новое }
+nodes:
+  clients: { title: clients, kind: src, icon: building-2, fields: [id, name, "status | клиент / лид"] }
+  requests: { title: requests, kind: core, icon: inbox, fields: [id, "client_id -> clients", "city | город", "dates | даты"] }
+  models: { title: models, kind: src, icon: user, fields: [id, name, "status | signed / not signed"] }
+  picks: { title: request_picks, kind: core, fields: [id, "request_id -> requests", "model_id -> models", "why | почему подходит"] }

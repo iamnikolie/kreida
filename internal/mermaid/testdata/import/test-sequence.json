@@ -1,0 +1,61 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "lanes",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "K",
+      "label": "Редактор",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "C",
+      "label": "C",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "m1",
+      "title": "Запрос",
+      "text": "→ Редактор",
+      "kind": "plain",
+      "group": "C",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 0,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m2",
+      "title": "Ответ",
+      "text": "→ C",
+      "kind": "p2",
+      "group": "K",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 1,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-m1-m2",
+      "from": "m1",
+      "to": "m2",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

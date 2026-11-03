@@ -1,0 +1,34 @@
+/* the bar: 56 px plus the home-indicator inset, every target at least 44 x 44; its content keeps clear of a notch at the sides */
+.phonebar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; box-sizing: border-box;
+  height: calc(56px + var(--safe-bottom)); padding: 0 calc(8px + var(--safe-right)) var(--safe-bottom) calc(8px + var(--safe-left));
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center;
+  background: var(--panel); border-top: 1px solid var(--zone-line); backdrop-filter: blur(8px); color: var(--fg); }
+/* chrome is IBM Plex Sans 15/500 on every board (D-2026-10-29-02, row f): the sketch hand belongs to the canvas and the title */
+.phonebar, .sheet { font: 500 15px "IBM Plex Sans", -apple-system, system-ui, sans-serif; }
+.phonebar button, .sheet .row { all: unset; box-sizing: border-box; cursor: pointer; color: var(--fg); -webkit-tap-highlight-color: transparent; }
+.phonebar button { display: grid; place-items: center; min-width: 44px; height: 44px; border-radius: 12px; }
+.phonebar button:not(:disabled):active, .sheet .row:active { background: color-mix(in srgb, var(--edge) 18%, transparent); }
+.phonebar button:disabled { opacity: .3; cursor: default; }
+.phonebar button:focus-visible, .sheet .row:focus-visible { outline: 2px solid var(--src); outline-offset: -2px; }
+/* the label never truncates (D-2026-10-29-04): it takes its own width and the steps' column gives way */
+.phonebar .all { grid-column: 1; justify-self: start; display: block; flex: none; padding: 0 12px;
+  line-height: 44px; white-space: nowrap; }
+.phonebar .stepper { grid-column: 2; justify-self: center; min-width: 0; display: flex; align-items: center; }
+.phonebar .stepper span { min-width: 56px; text-align: center; color: var(--pill-fg); font-variant-numeric: tabular-nums; }
+.phonebar .stepper span.none { color: var(--muted); }
+.phonebar .more { grid-column: 3; justify-self: end; }
+
+/* the sheet */
+.sheet-backdrop { all: unset; position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.4); }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; box-sizing: border-box; max-height: 80dvh; overflow: auto;
+  padding: 8px calc(16px + var(--safe-right)) calc(8px + var(--safe-bottom)) calc(16px + var(--safe-left)); border-radius: 16px 16px 0 0; background: var(--card);
+  box-shadow: var(--shadow); color: var(--fg); }
+.sheet h2 { margin: 12px 0 10px; font-size: 11.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.sheet section { padding-bottom: 8px; border-bottom: 1px solid var(--zone-line); }
+.sheet .row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 4px; border-radius: 10px; }
+
+/* the link to kreida at the foot: small and muted, still a 44 px target */
+.sheet .made-with.foot { display: flex; align-items: center; width: fit-content; min-height: 44px; margin: 4px auto 0; padding: 0 12px; }
+
+/* the legend's chips take the board's hand on the desktop; in the sheet they are chrome */
+.phone .sheet .chip { font-family: inherit; }

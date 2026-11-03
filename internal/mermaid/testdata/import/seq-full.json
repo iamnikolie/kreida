@@ -1,0 +1,227 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "lanes",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "A",
+      "label": "Alice",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "B",
+      "label": "Bob",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "C",
+      "label": "C",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "D",
+      "label": "D",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "m1",
+      "title": "Hello Bob",
+      "text": "→ Bob",
+      "kind": "plain",
+      "group": "A",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 0,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m2",
+      "title": "Hi Alice",
+      "text": "→ Alice",
+      "kind": "p2",
+      "group": "B",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 1,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m3",
+      "title": "async",
+      "text": "→ C",
+      "kind": "plain",
+      "group": "A",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 2,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m4",
+      "title": "lost",
+      "text": "→ Alice",
+      "kind": "plain",
+      "group": "C",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 3,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m5",
+      "title": "plain",
+      "text": "→ Bob",
+      "kind": "plain",
+      "group": "A",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 4,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m6",
+      "title": "dotted plain",
+      "text": "→ Alice",
+      "kind": "p2",
+      "group": "B",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 5,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m7",
+      "title": "activate",
+      "text": "→ Bob",
+      "kind": "plain",
+      "group": "A",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 6,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m8",
+      "title": "deactivate",
+      "text": "→ Alice",
+      "kind": "p2",
+      "group": "B",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 7,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m9",
+      "title": "ping",
+      "text": "→ Bob",
+      "kind": "plain",
+      "group": "A",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 8,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m10",
+      "title": "new participant",
+      "text": "→ Alice",
+      "kind": "plain",
+      "group": "D",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 9,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-m1-m2",
+      "from": "m1",
+      "to": "m2",
+      "label": ""
+    },
+    {
+      "id": "e1-m2-m3",
+      "from": "m2",
+      "to": "m3",
+      "label": ""
+    },
+    {
+      "id": "e2-m3-m4",
+      "from": "m3",
+      "to": "m4",
+      "label": ""
+    },
+    {
+      "id": "e3-m4-m5",
+      "from": "m4",
+      "to": "m5",
+      "label": ""
+    },
+    {
+      "id": "e4-m5-m6",
+      "from": "m5",
+      "to": "m6",
+      "label": ""
+    },
+    {
+      "id": "e5-m6-m7",
+      "from": "m6",
+      "to": "m7",
+      "label": ""
+    },
+    {
+      "id": "e6-m7-m8",
+      "from": "m7",
+      "to": "m8",
+      "label": ""
+    },
+    {
+      "id": "e7-m8-m9",
+      "from": "m8",
+      "to": "m9",
+      "label": ""
+    },
+    {
+      "id": "e8-m9-m10",
+      "from": "m9",
+      "to": "m10",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

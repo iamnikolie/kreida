@@ -1,0 +1,153 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "A",
+      "title": "A",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "B",
+      "title": "B",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "C",
+      "title": "C",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "D",
+      "title": "D",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "E",
+      "title": "E",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "F",
+      "title": "F",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "G",
+      "title": "G",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-A-C",
+      "from": "A",
+      "to": "C",
+      "label": ""
+    },
+    {
+      "id": "e1-A-D",
+      "from": "A",
+      "to": "D",
+      "label": ""
+    },
+    {
+      "id": "e2-B-C",
+      "from": "B",
+      "to": "C",
+      "label": ""
+    },
+    {
+      "id": "e3-B-D",
+      "from": "B",
+      "to": "D",
+      "label": ""
+    },
+    {
+      "id": "e4-C-E",
+      "from": "C",
+      "to": "E",
+      "label": ""
+    },
+    {
+      "id": "e5-C-F",
+      "from": "C",
+      "to": "F",
+      "label": ""
+    },
+    {
+      "id": "e6-E-G",
+      "from": "E",
+      "to": "G",
+      "label": ""
+    },
+    {
+      "id": "e7-F-G",
+      "from": "F",
+      "to": "G",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

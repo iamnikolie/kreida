@@ -1,0 +1,49 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "Users",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": {
+        "source": "url:https://example.com/stats",
+        "every": 60,
+        "path": "data.count",
+        "label": "users"
+      }
+    },
+    {
+      "id": "b",
+      "title": "b",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": {
+        "source": "cmd:date +%s",
+        "every": 15,
+        "path": null,
+        "label": ""
+      }
+    }
+  ],
+  "edges": [],
+  "steps": []
+}

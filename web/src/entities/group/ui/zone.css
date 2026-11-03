@@ -1,0 +1,31 @@
+/* groups */
+.zone { box-sizing: border-box; width: 100%; height: 100%; border-radius: 22px; background: var(--zone);
+  border: 1px solid var(--zone-line); position: relative; }
+.zone .zl { position: absolute; top: 16px; left: 0; right: 0; text-align: center; font-size: 11.5px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.zone.k-p2 { border-style: dashed; background: transparent; }
+.react-flow__node-zone.selected .zone { border-color: var(--edge); }
+
+/* swimlanes */
+.zone.lane { border-radius: 16px; }
+.zone.lane .zl { top: 0; bottom: 0; left: 0; right: auto; width: 150px; display: flex; align-items: center; justify-content: flex-start;
+  padding-left: 22px; text-align: left; font-size: 12px; border-right: 1px solid var(--zone-line); box-sizing: border-box; }
+/* a phone has no room for the label column: each card names its lane instead (D-2026-10-29-02, row e) */
+.phone .zone.lane .zl { display: none; }
+
+/* sketch style: the rough outline (--kc) replaces the border, Caveat replaces the UI font */
+.zone { --kc: var(--zone-line); }
+.zone.k-p2 { --kc: var(--p2); }
+.sketch .zone { position: relative; border-color: transparent; }
+.sketch .zone .rough path { stroke-width: 1.2; }
+.sketch .zl { font-family: 'Caveat', cursive; font-size: 15px; letter-spacing: .04em; }
+/* a client's page: group labels are Plex in every style (D-2026-10-29-03, row i) */
+.share .zl { font-family: inherit; font-size: 11.5px; letter-spacing: .1em; }
+.share .zone.lane .zl { font-size: 12px; }
+
+/* a group's header folds it (the editor, share links); a quiet chevron says so */
+.zone button.zl { border: 0; background: none; padding: 0; margin: 0 auto; width: max-content; display: flex; align-items: center; gap: 4px;
+  cursor: pointer; font-family: inherit; }
+.zone button.zl svg { opacity: .55; }
+.zone button.zl:hover { color: var(--fg); }
+.zone button.zl:hover svg { opacity: 1; }

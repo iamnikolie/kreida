@@ -1,0 +1,205 @@
+{
+  "title": "Как команда обрабатывает запросы",
+  "sub": "Ответ отправляется после проверки",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [
+    {
+      "kind": "src",
+      "label": "Что приходит"
+    },
+    {
+      "kind": "core",
+      "label": "Что делает ассистент"
+    },
+    {
+      "kind": "out",
+      "label": "Результат для команды"
+    }
+  ],
+  "groups": [
+    {
+      "id": "s1",
+      "label": "Новая запись",
+      "kind": null,
+      "direction": "LR",
+      "parent": null
+    },
+    {
+      "id": "s2",
+      "label": "Запрос клиента",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "a1",
+      "title": "Анкета в Telegram",
+      "text": "тема, описание",
+      "kind": "src",
+      "group": "s1",
+      "icon": "send",
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b1",
+      "title": "Заводит карточку",
+      "text": "проверяет дубли",
+      "kind": "core",
+      "group": "s1",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "reviewer",
+      "title": "Редактор",
+      "text": "",
+      "kind": "who",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "idea",
+      "title": "Просто карточка",
+      "text": "без цвета",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c1",
+      "title": "c1",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "x",
+      "title": "x",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "y",
+      "title": "y",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a",
+      "title": "a",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b",
+      "title": "b",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-a1-b1",
+      "from": "a1",
+      "to": "b1",
+      "label": ""
+    },
+    {
+      "id": "e1-b1-c1",
+      "from": "b1",
+      "to": "c1",
+      "label": ""
+    },
+    {
+      "id": "e2-b1-reviewer",
+      "from": "b1",
+      "to": "reviewer",
+      "label": "мало данных"
+    },
+    {
+      "id": "e3-x-y",
+      "from": "x",
+      "to": "y",
+      "label": "",
+      "dashed": true
+    },
+    {
+      "id": "e4-x-y",
+      "from": "x",
+      "to": "y",
+      "label": "",
+      "thick": true
+    },
+    {
+      "id": "e5-s1-s2",
+      "from": "s1",
+      "to": "s2",
+      "label": "",
+      "hidden": true
+    },
+    {
+      "id": "e6-a-b",
+      "from": "a",
+      "to": "b",
+      "label": "да",
+      "animated": true
+    }
+  ],
+  "steps": []
+}

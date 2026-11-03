@@ -1,0 +1,183 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "A",
+      "title": "A",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "B",
+      "title": "B",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "C",
+      "title": "C",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "D",
+      "title": "D",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "E",
+      "title": "E",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "F",
+      "title": "F",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "G",
+      "title": "G",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "H",
+      "title": "H",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "I",
+      "title": "I",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-A-B",
+      "from": "A",
+      "to": "B",
+      "label": "text"
+    },
+    {
+      "id": "e1-B-C",
+      "from": "B",
+      "to": "C",
+      "label": "dotted text",
+      "dashed": true
+    },
+    {
+      "id": "e2-C-D",
+      "from": "C",
+      "to": "D",
+      "label": "thick text",
+      "thick": true
+    },
+    {
+      "id": "e3-D-E",
+      "from": "D",
+      "to": "E",
+      "label": "two words here"
+    },
+    {
+      "id": "e4-E-F",
+      "from": "E",
+      "to": "F",
+      "label": "pipe"
+    },
+    {
+      "id": "e5-F-G",
+      "from": "F",
+      "to": "G",
+      "label": "quoted pipe"
+    },
+    {
+      "id": "e6-G-H",
+      "from": "G",
+      "to": "H",
+      "label": "d",
+      "dashed": true
+    },
+    {
+      "id": "e7-H-I",
+      "from": "H",
+      "to": "I",
+      "label": "t",
+      "thick": true
+    }
+  ],
+  "steps": []
+}

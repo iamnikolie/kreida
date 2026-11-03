@@ -1,0 +1,141 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "radial",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "root",
+      "title": "Идеи",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a",
+      "title": "Продажи",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a1",
+      "title": "Звонки",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a2",
+      "title": "Письма",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b",
+      "title": "Продукт",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b1",
+      "title": "Бот",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c",
+      "title": "Найм",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-root-a",
+      "from": "root",
+      "to": "a",
+      "label": ""
+    },
+    {
+      "id": "e1-a-a1",
+      "from": "a",
+      "to": "a1",
+      "label": ""
+    },
+    {
+      "id": "e2-a-a2",
+      "from": "a",
+      "to": "a2",
+      "label": ""
+    },
+    {
+      "id": "e3-root-b",
+      "from": "root",
+      "to": "b",
+      "label": ""
+    },
+    {
+      "id": "e4-b-b1",
+      "from": "b",
+      "to": "b1",
+      "label": ""
+    },
+    {
+      "id": "e5-root-c",
+      "from": "root",
+      "to": "c",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

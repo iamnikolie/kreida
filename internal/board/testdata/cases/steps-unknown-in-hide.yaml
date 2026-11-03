@@ -1,0 +1,3 @@
+nodes: { a: A }
+steps:
+  - { show: [a], hide: [nope] }

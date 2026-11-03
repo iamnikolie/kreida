@@ -1,0 +1,2 @@
+nodes:
+  a: { live: { cmd: x, url: "http://x" } }

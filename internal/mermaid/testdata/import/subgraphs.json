@@ -1,0 +1,153 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "TB",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "one",
+      "label": "First",
+      "kind": null,
+      "direction": "LR",
+      "parent": null
+    },
+    {
+      "id": "inner",
+      "label": "Inner group",
+      "kind": null,
+      "direction": null,
+      "parent": "one"
+    },
+    {
+      "id": "two",
+      "label": "Second one",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "Some_title_with_spaces",
+      "label": "Some title with spaces",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "three",
+      "label": "three",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "a",
+      "text": "",
+      "kind": "plain",
+      "group": "one",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b",
+      "title": "b",
+      "text": "",
+      "kind": "plain",
+      "group": "one",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c",
+      "title": "c",
+      "text": "",
+      "kind": "plain",
+      "group": "inner",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "d",
+      "title": "d",
+      "text": "",
+      "kind": "plain",
+      "group": "two",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "e",
+      "title": "e",
+      "text": "",
+      "kind": "plain",
+      "group": "Some_title_with_spaces",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "f",
+      "title": "f",
+      "text": "",
+      "kind": "plain",
+      "group": "three",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-a-b",
+      "from": "a",
+      "to": "b",
+      "label": ""
+    },
+    {
+      "id": "e1-one-two",
+      "from": "one",
+      "to": "two",
+      "label": ""
+    },
+    {
+      "id": "e2-a-d",
+      "from": "a",
+      "to": "d",
+      "label": ""
+    },
+    {
+      "id": "e3-b-e",
+      "from": "b",
+      "to": "e",
+      "label": "",
+      "hidden": true
+    }
+  ],
+  "steps": []
+}

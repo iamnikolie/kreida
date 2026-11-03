@@ -1,0 +1,187 @@
+{
+  "title": "Title: with colon",
+  "sub": "стрелка = «один ко многим»",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [
+    {
+      "kind": "src",
+      "label": "Уже есть"
+    },
+    {
+      "kind": "core",
+      "label": "Новое"
+    }
+  ],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "clients",
+      "title": "clients",
+      "text": "",
+      "kind": "src",
+      "group": null,
+      "icon": "building-2",
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": [
+        {
+          "name": "id",
+          "ref": null,
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "ref": null,
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "ref": null,
+          "dashed": false,
+          "note": "клиент / лид"
+        }
+      ],
+      "live": null
+    },
+    {
+      "id": "requests",
+      "title": "requests",
+      "text": "",
+      "kind": "core",
+      "group": null,
+      "icon": "inbox",
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": [
+        {
+          "name": "id",
+          "ref": null,
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "client_id",
+          "ref": "clients",
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "city",
+          "ref": null,
+          "dashed": false,
+          "note": "город"
+        },
+        {
+          "name": "dates",
+          "ref": null,
+          "dashed": false,
+          "note": "даты"
+        }
+      ],
+      "live": null
+    },
+    {
+      "id": "models",
+      "title": "models",
+      "text": "",
+      "kind": "src",
+      "group": null,
+      "icon": "user",
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": [
+        {
+          "name": "id",
+          "ref": null,
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "ref": null,
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "ref": null,
+          "dashed": false,
+          "note": "signed / not signed"
+        }
+      ],
+      "live": null
+    },
+    {
+      "id": "picks",
+      "title": "request_picks",
+      "text": "",
+      "kind": "core",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": [
+        {
+          "name": "id",
+          "ref": null,
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "request_id",
+          "ref": "requests",
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "model_id",
+          "ref": "models",
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "why",
+          "ref": null,
+          "dashed": false,
+          "note": "почему подходит"
+        }
+      ],
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-clients-requests-client_id",
+      "from": "clients",
+      "to": "requests",
+      "label": "",
+      "fromPort": "id",
+      "toPort": "client_id"
+    },
+    {
+      "id": "e1-requests-picks-request_id",
+      "from": "requests",
+      "to": "picks",
+      "label": "",
+      "fromPort": "id",
+      "toPort": "request_id"
+    },
+    {
+      "id": "e2-models-picks-model_id",
+      "from": "models",
+      "to": "picks",
+      "label": "",
+      "fromPort": "id",
+      "toPort": "model_id"
+    }
+  ],
+  "steps": []
+}

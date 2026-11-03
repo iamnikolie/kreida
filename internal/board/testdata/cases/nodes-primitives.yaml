@@ -1,0 +1,8 @@
+nodes:
+  n1: 42
+  n2: true
+  n3: ~
+  n4:
+  n5: ""
+  n6: "  padded  "
+  n7: 1.5

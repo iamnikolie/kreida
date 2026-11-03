@@ -1,0 +1,101 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "cities",
+      "title": "cities",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": [
+        {
+          "name": "id",
+          "ref": null,
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "ref": null,
+          "dashed": false,
+          "note": ""
+        }
+      ],
+      "live": null
+    },
+    {
+      "id": "models",
+      "title": "models",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": [
+        {
+          "name": "id",
+          "ref": null,
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "city_id",
+          "ref": "cities",
+          "dashed": false,
+          "note": "note"
+        },
+        {
+          "name": "agency_id",
+          "ref": "agencies",
+          "dashed": true,
+          "note": ""
+        }
+      ],
+      "live": null
+    },
+    {
+      "id": "agencies",
+      "title": "agencies",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-cities-models-city_id",
+      "from": "cities",
+      "to": "models",
+      "label": "",
+      "fromPort": "id",
+      "toPort": "city_id"
+    },
+    {
+      "id": "e1-agencies-models-agency_id",
+      "from": "agencies",
+      "to": "models",
+      "label": "",
+      "dashed": true,
+      "toPort": "agency_id"
+    }
+  ],
+  "steps": []
+}

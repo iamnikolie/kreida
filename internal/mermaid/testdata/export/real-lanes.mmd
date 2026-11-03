@@ -1,0 +1,11 @@
+flowchart LR
+  subgraph reviewer["Редактор"]
+    k1["Дать доступ"]:::src
+  end
+  subgraph author["Автор"]
+    c1["Изучить базу"]:::core
+    c0["Мокап"]:::core
+  end
+  k1 --> c1
+  classDef src stroke:#4a7fd4,stroke-width:1.6px
+  classDef core stroke:#d4943a,stroke-width:1.6px

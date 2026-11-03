@@ -1,0 +1,4 @@
+edges: [ a -> b ]
+steps:
+  - a
+  - { show: [b] }

@@ -1,0 +1,3 @@
+nodes:
+  a: { title: Users, live: { url: "https://example.com/stats", path: data.count, every: 60, label: users } }
+  b: { live: { cmd: "date +%s", every: "15" } }

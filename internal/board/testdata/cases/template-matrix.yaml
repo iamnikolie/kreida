@@ -1,0 +1,12 @@
+title: "Title: with colon"
+sub: что делать первым
+layout: matrix
+x: { label: Усилия, low: мало, high: много }
+y: { label: Эффект, low: слабый, high: сильный }
+hot: low-high
+quadrants: { low-high: Быстрые победы, high-high: Большие ставки, low-low: Мелочи, high-low: Не сейчас }
+nodes:
+  a: { title: Шаблоны ответов, x: low, y: high }
+  b: { title: Своя CRM, x: high, y: high }
+  c: { title: Новый логотип, x: low, y: low }
+  d: { title: Переезд на другой сервер, x: high, y: low }

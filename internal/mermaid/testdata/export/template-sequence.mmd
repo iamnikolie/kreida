@@ -1,0 +1,17 @@
+%% title: Title: with colon
+%% sub: сообщения по порядку
+flowchart LR
+  subgraph client["Клиент"]
+    m1["Запрос<br/>→ Ассистент"]
+  end
+  subgraph bot["Ассистент"]
+    m2["Черновик ответа<br/>→ Редактор"]
+    m4["Ответ клиенту<br/>→ Клиент"]:::out
+  end
+  subgraph human["Редактор"]
+    m3["«ОК»<br/>→ Ассистент"]
+  end
+  m1 --> m2
+  m2 --> m3
+  m3 --> m4
+  classDef out stroke:#4f9a62,stroke-width:1.6px

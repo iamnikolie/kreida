@@ -1,0 +1,15 @@
+node_modules/
+web/dist/*
+!web/dist/.keep
+.env*
+*.log
+.DS_Store
+# pre-React Mermaid prototype, kept locally only
+old/
+/doska
+/kreida
+.pnpm-store/
+.claude/
+
+# GoReleaser output
+/dist/

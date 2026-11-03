@@ -1,0 +1,10 @@
+groups: { g: G }
+nodes: { a: A, b: B }
+steps:
+  - { show: a }
+  - { show: [a, b], hide: [g] }
+  - { title: 5, show: "a,  b ,," }
+  - { hide: a }
+  - {}
+  - [a]
+  - [a, b]

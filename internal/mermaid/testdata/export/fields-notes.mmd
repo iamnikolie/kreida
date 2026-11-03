@@ -1,0 +1,7 @@
+flowchart LR
+  t["users<br/>id<br/>name<br/>status<br/>email<br/>plan_id → plans<br/>plan2_id → plans<br/>opt_id → others<br/>spaced"]
+  plans["plans"]
+  others["others"]
+  plans --> t
+  plans --> t
+  others -.-> t

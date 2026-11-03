@@ -1,0 +1,84 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "now",
+      "label": "Сейчас",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "later",
+      "label": "С ассистентом",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "a",
+      "text": "",
+      "kind": "plain",
+      "group": "now",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b",
+      "title": "b",
+      "text": "",
+      "kind": "plain",
+      "group": "later",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "client",
+      "title": "Клиент",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [],
+  "steps": [
+    {
+      "title": "Сейчас",
+      "show": [
+        "now"
+      ],
+      "hide": []
+    },
+    {
+      "title": "С ассистентом",
+      "show": [
+        "later"
+      ],
+      "hide": [
+        "now"
+      ]
+    }
+  ]
+}

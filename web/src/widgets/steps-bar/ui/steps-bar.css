@@ -1,0 +1,10 @@
+.steps { display: flex; align-items: center; gap: 6px; padding: 5px; border-radius: 999px; background: var(--panel);
+  box-shadow: var(--shadow); backdrop-filter: blur(8px); margin-bottom: calc(22px + var(--safe-bottom)); font-size: 13px; color: var(--pill-fg); }
+.steps span { min-width: 54px; text-align: center; font-variant-numeric: tabular-nums; }
+.steps span b { margin-left: 10px; font-weight: 600; }
+.steps span:only-child { padding: 0 12px; }
+.steps button { all: unset; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 999px; cursor: pointer; color: var(--fg); }
+.steps button:hover { background: color-mix(in srgb, var(--edge) 18%, transparent); }
+
+/* the hand-set bar is the editor's: a client's page keeps chrome in Plex in every style (D-2026-10-29-03, row i) */
+.sketch:not(.share) .steps span { font-family: 'Caveat', cursive; }

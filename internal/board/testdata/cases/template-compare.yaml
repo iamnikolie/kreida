@@ -1,0 +1,16 @@
+title: "Title: with colon"
+direction: LR
+nodes:
+  options:
+    title: Варианты
+    cols: [Вариант, Цена, Скорость запуска, Риск]
+    rows:
+      - [n8n, { text: $20/мес, score: 2 }, { text: неделя, score: 1 }, { text: средний, score: 0 }]
+      - [Zapier, { text: $70/мес, score: -1 }, { text: два дня, score: 2 }, { text: низкий, score: 1 }]
+      - [Свой код, { text: $0, score: 2 }, { text: месяц, score: -1 }, { text: высокий, score: -1 }]
+  pick: { title: Решение, kind: note, text: "**n8n**: дёшево и хватит на год.\n- Zapier, если нужно к пятнице\n- свой код потом" }
+edges:
+  - options -> pick
+questions:
+  - Какой бюджет в месяц?
+  - { text: Когда нужен запуск, on: pick }

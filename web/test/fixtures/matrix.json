@@ -1,0 +1,102 @@
+{
+  "title": "Что делать первым",
+  "sub": "",
+  "direction": "LR",
+  "layout": "matrix",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "Шаблоны ответов",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null,
+      "x": "low",
+      "y": "high"
+    },
+    {
+      "id": "b",
+      "title": "Своя CRM",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null,
+      "x": "high",
+      "y": "high"
+    },
+    {
+      "id": "c",
+      "title": "Новый логотип",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null,
+      "x": "low",
+      "y": "low"
+    },
+    {
+      "id": "d",
+      "title": "Переезд",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null,
+      "x": "high",
+      "y": "low"
+    },
+    {
+      "id": "e",
+      "title": "Ещё не решили",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [],
+  "steps": [],
+  "matrix": {
+    "x": {
+      "label": "Усилия",
+      "low": "мало",
+      "high": "много"
+    },
+    "y": {
+      "label": "Эффект",
+      "low": "слабый",
+      "high": "сильный"
+    },
+    "hot": "low-high",
+    "quadrants": {
+      "low-high": "Быстрые победы"
+    }
+  }
+}

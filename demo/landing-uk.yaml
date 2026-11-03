@@ -1,0 +1,21 @@
+title: Як заявка стає відповіддю
+sub: Нічого не йде клієнту без «ОК» менеджера
+style: sketch
+direction: LR
+legend: { src: Надходить, core: Робить асистент, who: Вирішує людина, out: Отримує клієнт }
+nodes:
+  tg: { title: Заявка з Telegram, text: клієнт пише в чат, kind: src, icon: telegram }
+  read: { title: Асистент розбирає, text: що потрібно і на коли, kind: core, icon: bot }
+  draft: { title: Чернетка відповіді, text: "ціна, терміни, варіанти", kind: core, icon: file-text }
+  ok: { title: "Менеджер натискає «ОК»", text: без нього нічого не йде, kind: who, icon: check }
+  reply: { title: Відповідь клієнту, text: у той самий чат, kind: out, icon: send }
+  crm: { title: Запис у CRM, text: картка і статус, kind: out, icon: database }
+edges:
+  - tg -> read -> draft -> ok -> reply -> crm
+steps:
+  - { title: Прийшла заявка, show: [tg] }
+  - { title: Асистент розбирає, show: [read] }
+  - { title: Готова чернетка, show: [draft] }
+  - { title: Менеджер тисне «ОК», show: [ok] }
+  - { title: Відповідь у клієнта, show: [reply] }
+  - { title: Картка в CRM, show: [crm] }

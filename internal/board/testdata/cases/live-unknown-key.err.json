@@ -1,0 +1,4 @@
+{
+  "yaml": false,
+  "message": "node a live: unknown key \"shell\" — quote values that contain commas or colons"
+}

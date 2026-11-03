@@ -1,0 +1,1 @@
+nodes: [ { id: a, title: A }, { id: b, title: Bee 2, text: two } ]

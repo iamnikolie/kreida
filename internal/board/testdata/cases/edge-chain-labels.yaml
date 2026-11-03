@@ -1,0 +1,4 @@
+nodes: { a: A, b: B, c: C }
+edges:
+  - a -> b -> c: label on the last hop
+  - c -> a

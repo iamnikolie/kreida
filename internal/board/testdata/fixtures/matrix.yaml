@@ -1,0 +1,12 @@
+title: Что делать первым
+layout: matrix
+x: { label: Усилия, low: мало, high: много }
+y: { label: Эффект, low: слабый, high: сильный }
+hot: low-high
+quadrants: { low-high: Быстрые победы }
+nodes:
+  a: { title: Шаблоны ответов, x: low, y: high }
+  b: { title: Своя CRM, x: high, y: high }
+  c: { title: Новый логотип, x: low, y: low }
+  d: { title: Переезд, x: high, y: low }
+  e: Ещё не решили

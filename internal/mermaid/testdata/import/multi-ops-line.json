@@ -1,0 +1,125 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "A",
+      "title": "A",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "B",
+      "title": "B",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "C",
+      "title": "C",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "D",
+      "title": "D",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "E",
+      "title": "E",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "F",
+      "title": "F",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-A-B",
+      "from": "A",
+      "to": "B",
+      "label": ""
+    },
+    {
+      "id": "e1-B-C",
+      "from": "B",
+      "to": "C",
+      "label": "",
+      "dashed": true
+    },
+    {
+      "id": "e2-C-D",
+      "from": "C",
+      "to": "D",
+      "label": "",
+      "thick": true
+    },
+    {
+      "id": "e3-D-E",
+      "from": "D",
+      "to": "E",
+      "label": "",
+      "hidden": true
+    },
+    {
+      "id": "e4-E-F",
+      "from": "E",
+      "to": "F",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

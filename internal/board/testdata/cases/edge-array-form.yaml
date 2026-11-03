@@ -1,0 +1,4 @@
+edges:
+  - [a, b]
+  - [b, c, label]
+  - [c]

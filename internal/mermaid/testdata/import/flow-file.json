@@ -1,0 +1,281 @@
+{
+  "title": "Как команда обрабатывает запросы",
+  "sub": "Ответ отправляется после проверки",
+  "direction": "TB",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [
+    {
+      "kind": "src",
+      "label": "Что приходит"
+    },
+    {
+      "kind": "core",
+      "label": "Что делает ассистент"
+    },
+    {
+      "kind": "out",
+      "label": "Результат для команды"
+    }
+  ],
+  "groups": [
+    {
+      "id": "S1",
+      "label": "Новая запись",
+      "kind": null,
+      "direction": "LR",
+      "parent": null
+    },
+    {
+      "id": "S2",
+      "label": "Запрос клиента",
+      "kind": null,
+      "direction": "LR",
+      "parent": null
+    },
+    {
+      "id": "S3",
+      "label": "Почта",
+      "kind": null,
+      "direction": "LR",
+      "parent": null
+    },
+    {
+      "id": "S4",
+      "label": "Каждое утро",
+      "kind": null,
+      "direction": "LR",
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "a1",
+      "title": "Анкета в Telegram",
+      "text": "тема, описание, контакты",
+      "kind": "src",
+      "group": "S1",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b1",
+      "title": "Заводит карточку",
+      "text": "проверяет дубли, раскладывает поля",
+      "kind": "core",
+      "group": "S1",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c1",
+      "title": "Запись в базе",
+      "text": "+ «не хватает описания»",
+      "kind": "out",
+      "group": "S1",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a2",
+      "title": "«3 заявки на проверку»",
+      "text": "письмо или сообщение",
+      "kind": "src",
+      "group": "S2",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b2",
+      "title": "Подбирает по базе",
+      "text": "тема, срок, статус",
+      "kind": "core",
+      "group": "S2",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c2",
+      "title": "Шорт-лист",
+      "text": "список записей и черновик ответа",
+      "kind": "out",
+      "group": "S2",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a3",
+      "title": "Входящие письма",
+      "text": "вопросы, заявки, обновления",
+      "kind": "src",
+      "group": "S3",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b3",
+      "title": "Разбирает и пишет",
+      "text": "важное наверх, черновики ответов",
+      "kind": "core",
+      "group": "S3",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c3",
+      "title": "Кнопка «Отправить»",
+      "text": "в Telegram, одним нажатием",
+      "kind": "out",
+      "group": "S3",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a4",
+      "title": "Задачи и сроки",
+      "text": "проверки, напоминания, ответы",
+      "kind": "src",
+      "group": "S4",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b4",
+      "title": "Собирает сводку",
+      "text": "что горит, что ждёт ответа",
+      "kind": "core",
+      "group": "S4",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c4",
+      "title": "Утренняя сводка",
+      "text": "план дня в одном сообщении",
+      "kind": "out",
+      "group": "S4",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-a1-b1",
+      "from": "a1",
+      "to": "b1",
+      "label": ""
+    },
+    {
+      "id": "e1-b1-c1",
+      "from": "b1",
+      "to": "c1",
+      "label": ""
+    },
+    {
+      "id": "e2-a2-b2",
+      "from": "a2",
+      "to": "b2",
+      "label": ""
+    },
+    {
+      "id": "e3-b2-c2",
+      "from": "b2",
+      "to": "c2",
+      "label": ""
+    },
+    {
+      "id": "e4-a3-b3",
+      "from": "a3",
+      "to": "b3",
+      "label": ""
+    },
+    {
+      "id": "e5-b3-c3",
+      "from": "b3",
+      "to": "c3",
+      "label": ""
+    },
+    {
+      "id": "e6-a4-b4",
+      "from": "a4",
+      "to": "b4",
+      "label": ""
+    },
+    {
+      "id": "e7-b4-c4",
+      "from": "b4",
+      "to": "c4",
+      "label": ""
+    },
+    {
+      "id": "e8-S1-S2",
+      "from": "S1",
+      "to": "S2",
+      "label": "",
+      "hidden": true
+    },
+    {
+      "id": "e9-S2-S3",
+      "from": "S2",
+      "to": "S3",
+      "label": "",
+      "hidden": true
+    },
+    {
+      "id": "e10-S3-S4",
+      "from": "S3",
+      "to": "S4",
+      "label": "",
+      "hidden": true
+    }
+  ],
+  "steps": []
+}

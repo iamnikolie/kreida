@@ -1,0 +1,6 @@
+x-defaults: &d { kind: core }
+nodes:
+  a: &n { title: Shared, kind: src }
+  b: *n
+  c: { title: Other, kind: *k }
+  d: *d

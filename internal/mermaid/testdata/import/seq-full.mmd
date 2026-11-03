@@ -1,0 +1,17 @@
+sequenceDiagram
+  participant A as Alice
+  actor B as Bob
+  participant C
+  A->>B: Hello Bob
+  B-->>A: Hi Alice
+  A-)C: async
+  C-xA: lost
+  A->B: plain
+  B-->A: dotted plain
+  A->>+B: activate
+  B-->>-A: deactivate
+  Note over A,B: ignored
+  loop Every minute
+    A->>B: ping
+  end
+  D->>A: new participant

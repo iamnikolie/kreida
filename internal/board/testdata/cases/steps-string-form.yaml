@@ -1,0 +1,6 @@
+nodes: { a: A, b: B, c: C }
+steps:
+  - a
+  - "b, c"
+  - ""
+  - ~

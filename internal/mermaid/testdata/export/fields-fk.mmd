@@ -1,0 +1,6 @@
+flowchart LR
+  cities["cities<br/>id<br/>name"]
+  models["models<br/>id<br/>city_id → cities<br/>agency_id → agencies"]
+  agencies["agencies"]
+  cities --> models
+  agencies -.-> models

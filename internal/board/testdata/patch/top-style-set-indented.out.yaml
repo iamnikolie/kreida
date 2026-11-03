@@ -1,0 +1,6 @@
+nodes:
+  a:
+    title: A
+    kind: src
+  b: B
+style: sketch

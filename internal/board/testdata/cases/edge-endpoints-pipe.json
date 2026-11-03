@@ -1,0 +1,46 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "Cache | redis",
+      "title": "Cache",
+      "text": "redis",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "App | server",
+      "title": "App",
+      "text": "server",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-Cache | redis-App | server",
+      "from": "Cache | redis",
+      "to": "App | server",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

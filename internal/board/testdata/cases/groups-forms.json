@@ -1,0 +1,55 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "s1",
+      "label": "Новая запись",
+      "kind": null,
+      "direction": "LR",
+      "parent": null
+    },
+    {
+      "id": "s2",
+      "label": "Запрос клиента",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "s3",
+      "label": "Через title",
+      "kind": "p2",
+      "direction": "TB",
+      "parent": "s1"
+    },
+    {
+      "id": "s4",
+      "label": "Wrong dir",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "s5",
+      "label": "s5",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "s6",
+      "label": "7",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [],
+  "edges": [],
+  "steps": []
+}

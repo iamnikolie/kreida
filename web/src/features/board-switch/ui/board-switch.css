@@ -1,0 +1,4 @@
+select.board-switch { font: inherit; font-size: 13px; color: var(--fg); background: var(--panel); border: 1px solid var(--zone-line);
+  border-radius: 8px; padding: 4px 8px; backdrop-filter: blur(8px); }
+input.board-switch { font: inherit; font-size: 13px; color: var(--fg); background: var(--panel); border: 1px solid var(--src);
+  border-radius: 8px; padding: 4px 8px; outline: none; width: 180px; }

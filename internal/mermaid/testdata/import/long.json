@@ -1,0 +1,87 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "TB",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "S1",
+      "label": "Alpha",
+      "kind": null,
+      "direction": "LR",
+      "parent": null
+    },
+    {
+      "id": "S2",
+      "label": "Beta",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "a1",
+      "title": "One",
+      "text": "x, y",
+      "kind": "src",
+      "group": "S1",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a2",
+      "title": "Two",
+      "text": "",
+      "kind": "core",
+      "group": "S1",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b1",
+      "title": "Three",
+      "text": "",
+      "kind": "out",
+      "group": "S2",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-a1-a2",
+      "from": "a1",
+      "to": "a2",
+      "label": ""
+    },
+    {
+      "id": "e1-S1-S2",
+      "from": "S1",
+      "to": "S2",
+      "label": "",
+      "hidden": true
+    },
+    {
+      "id": "e2-a2-b1",
+      "from": "a2",
+      "to": "b1",
+      "label": "go"
+    }
+  ],
+  "steps": []
+}

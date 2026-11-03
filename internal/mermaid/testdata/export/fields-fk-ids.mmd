@@ -1,0 +1,11 @@
+flowchart LR
+  a["a<br/>id<br/>name"]
+  b["b<br/>id<br/>a_id → a"]
+  c["c<br/>name<br/>a_id → a<br/>b_id → b"]
+  d["d<br/>x → missing"]
+  missing["missing"]
+  a --> d
+  a --> b
+  a --> c
+  b --> c
+  missing --> d

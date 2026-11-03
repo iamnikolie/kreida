@@ -1,0 +1,2 @@
+nodes:
+  a: { title: A, live: { cmd: "echo 1", every: 1 } }

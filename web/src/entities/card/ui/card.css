@@ -1,0 +1,155 @@
+/* cards */
+.card {
+  box-sizing: border-box; width: 100%; height: 100%; display: flex; align-items: center;
+  padding: 12px 18px; border-radius: 14px; background: var(--plain-bg); border: 1.5px solid var(--plain);
+  box-shadow: var(--shadow); color: var(--fg); transition: box-shadow .15s, transform .15s;
+}
+.card:hover { box-shadow: var(--shadow), 0 0 0 4px color-mix(in srgb, var(--edge) 18%, transparent); }
+.card .row { display: flex; gap: 10px; align-items: flex-start; width: 100%; }
+.card .body { flex: 1; min-width: 0; text-align: center; }
+.card .ic { flex: none; margin-top: 2px; opacity: .85; }
+.card .ic + .body { text-align: left; }
+.card .t { font-weight: 600; font-size: 15px; line-height: 21px; letter-spacing: -.005em; outline: none; }
+.card .d { margin-top: 4px; font-size: 13px; line-height: 18px; color: var(--muted); outline: none; }
+/* a phone: the title wraps to two lines at most (the layout reserves exactly that), and a card that is 168 px wide at most
+   never lets a long word push past its edge (D-2026-10-29-02, row a) */
+.phone .card .t { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: break-word; }
+/* a live value never drops on a phone (D-2026-10-29-02 amendment): the chip's dot, label and value flow onto more lines rather
+   than cut the value short, and a card grows to hold what the layout did not foresee (it is never smaller than its box) */
+.phone .card { height: auto; min-height: 100%; }
+.phone .card .live { display: inline-block; max-width: 100%; box-sizing: border-box; text-align: left; border-radius: 12px; }
+.phone .card .live i { display: inline-block; vertical-align: middle; margin: -2px 6px 0 0; }
+.phone .card .live .ll { white-space: normal; margin-right: 3px; } /* the space between label and value is a place to wrap */
+.phone .card .live b { overflow: visible; white-space: normal; overflow-wrap: break-word; }
+/* the lane a card belongs to, above its title: 11 px caps (row e); there is no lane column on a phone to say it */
+.card .cap { margin-bottom: 3px; font: 600 11px/14px "IBM Plex Sans", -apple-system, system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+.card.editing { box-shadow: var(--shadow), 0 0 0 3px var(--src); cursor: text; }
+.card.editing .t, .card.editing .d { min-height: 18px; border-radius: 4px; }
+.card.editing .d:empty::before { content: attr(data-placeholder); color: var(--muted); opacity: .5; }
+
+.card.k-src  { background: var(--src-bg);  border-color: var(--src); }
+.card.k-src .ic { color: var(--src); }
+.card.k-core { background: var(--core-bg); border-color: var(--core); }
+.card.k-core .ic { color: var(--core); }
+.card.k-out  { background: var(--out-bg);  border-color: var(--out); }
+.card.k-out .ic { color: var(--out); }
+.card.k-warn { background: var(--warn-bg); border-color: var(--warn); }
+.card.k-warn .ic { color: var(--warn); }
+.card.k-info { background: var(--info-bg); border-color: var(--info); }
+.card.k-info .ic { color: var(--info); }
+.card.k-p2   { background: var(--p2-bg); border: 1.5px dashed var(--p2); box-shadow: none; }
+.card.k-p2 .t { color: var(--p2-fg); font-weight: 500; }
+.card.k-who, .card.s-pill { border-radius: 999px; padding: 8px 20px; }
+.card.k-who  { background: var(--who-bg); border-color: var(--who); color: var(--who-fg); }
+.card.k-who .d { color: var(--who-fg); opacity: .7; }
+.card.k-note { background: var(--note-bg); border: none; border-radius: 4px; color: var(--note-fg);
+  box-shadow: 0 1px 1px rgba(0,0,0,.08), 0 10px 20px -6px rgba(60,45,0,.25); }
+.card.k-note .body { text-align: left; }
+.card.k-note .t { font-weight: 500; }
+.card.k-note .d { color: var(--note-fg); opacity: .75; }
+
+/* live values */
+.card .live { display: inline-flex; align-items: center; gap: 6px; margin-top: 7px; padding: 2px 10px 2px 8px; border-radius: 999px;
+  background: color-mix(in srgb, var(--fg) 6%, transparent); font-size: 13px; line-height: 19px; max-width: 100%; }
+.card .live i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex: none; }
+.card .live b { font-weight: 650; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card .live .ll { color: var(--muted); white-space: nowrap; }
+.card .live.good i { background: var(--out); }
+.card .live.bad i { background: var(--warn); }
+.card .live.bad { color: var(--warn); }
+
+/* tables (nodes with fields) — row height must match ROW in lib/geometry.ts */
+.card.table { display: block; padding: 0 0 6px; overflow: hidden; position: relative; }
+.card.table .th { box-sizing: border-box; display: flex; gap: 8px; align-items: flex-start; padding: 10px 14px;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent); overflow: hidden; }
+.card.table .body { text-align: left; }
+.card.table .t { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; }
+.card.table .d { font-size: 12px; }
+.card.table .tr { display: flex; align-items: baseline; gap: 8px; height: 24px; line-height: 24px; padding: 0 14px;
+  font-size: 12.5px; white-space: nowrap; }
+.card.table .fn { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; flex: none; }
+.card.table .pk .fn { font-weight: 700; }
+.card.table .fk .fn { text-decoration: underline dotted; text-underline-offset: 3px; }
+.card.table .fnote { color: var(--muted); overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+.card.table .fr { color: var(--muted); margin-left: auto; flex: none; font-size: 11.5px; }
+.card.table .react-flow__handle { position: absolute; }
+
+.react-flow__node.selected .card { box-shadow: var(--shadow), 0 0 0 3px color-mix(in srgb, var(--src) 45%, transparent); }
+
+/* sketch style: the rough outline (--kc) replaces the border, Caveat replaces the UI font.
+   Kept after the rules above on purpose: several have the same specificity and rely on coming later. */
+.card { --kc: var(--plain); }
+.card.k-src { --kc: var(--src); } .card.k-core { --kc: var(--core); } .card.k-out { --kc: var(--out); }
+.card.k-warn { --kc: var(--warn); } .card.k-info { --kc: var(--info); } .card.k-p2 { --kc: var(--p2); }
+.card.k-who { --kc: var(--who); }
+.sketch .card { position: relative; border-color: transparent !important; box-shadow: none; }
+.sketch .card.k-note { box-shadow: 0 1px 1px rgba(0,0,0,.08), 0 10px 20px -6px rgba(60,45,0,.25); }
+.sketch .card .t, .sketch .card .d { font-family: 'Caveat', cursive; }
+.sketch .card .t { font-size: 19px; font-weight: 700; letter-spacing: 0; }
+.sketch .card .d { font-size: 16px; }
+.sketch .card.table .t, .sketch .card.table .fn { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* A client's page (share mode: a link, the landing embed; the owner's editor is unchanged), D-2026-10-29-03 rows i and j:
+   the second line is IBM Plex Sans 13 px in every style - the sketch hand is for the card's title - and reads at 4.5:1 or
+   more on its fill (--sub; a who pill and a note keep their own ink, at an opacity that passes). */
+.share.sketch .card .d { font-family: "IBM Plex Sans", -apple-system, system-ui, sans-serif; font-size: 13px; }
+.share .card:not(.k-who):not(.k-note) .d { color: var(--sub); }
+.share .card.k-note .d { opacity: .85; }
+
+/* badges on a card's corner: open questions about it (?) and notes for the agent (count) */
+.card, .cardwrap { position: relative; }
+.cardwrap { width: 100%; height: 100%; }
+.badge { position: absolute; top: -9px; right: -9px; display: inline-flex; align-items: center; justify-content: center; gap: 3px;
+  min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; font: 700 12px/20px "IBM Plex Sans", -apple-system, system-ui, sans-serif;
+  box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+.badge.ask { background: var(--info); color: var(--bg); }
+.badge.notes { background: var(--core); color: var(--bg); }
+.badge.ask + .badge.notes { right: 16px; }
+
+/* a note's markdown (kind: note): the sticky's ink, headings a size up, lists indented */
+.card .md { margin-top: 4px; font-size: 13px; line-height: 18px; color: var(--note-fg); text-align: left; }
+.card .md > * { margin: 6px 0 0; }
+.card .md h4 { font-size: 15px; line-height: 21px; font-weight: 650; }
+.card .md ul, .card .md ol { padding-left: 18px; }
+.card .md code { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; padding: 0 3px; border-radius: 3px; background: color-mix(in srgb, currentColor 10%, transparent); }
+.card .md a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.card.k-note:has(.md) { align-items: flex-start; }
+.share.sketch .card .md, .sketch .card .md { font-family: "IBM Plex Sans", -apple-system, system-ui, sans-serif; }
+
+/* table cards (cols/rows): sizes come from lib/grid.ts and are set inline */
+.card.grid { display: block; padding: 0 0 4px; overflow: hidden; }
+.card.grid .th { box-sizing: border-box; display: flex; gap: 8px; align-items: flex-start; padding: 10px 14px;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent); }
+.card.grid .body { text-align: left; }
+.card.grid .gr { display: grid; box-sizing: border-box; border-bottom: 1px solid color-mix(in srgb, currentColor 8%, transparent); }
+.card.grid .gr:last-child { border-bottom: none; }
+.card.grid .gc { box-sizing: border-box; padding: 6px 11px; font-size: 13px; line-height: 18px; overflow-wrap: break-word; }
+.card.grid .gc:first-child { font-weight: 600; }
+.card.grid .gh .gc { font-size: 11.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+/* a phone: words never break mid-word, the rows take what their text needs (Grid sets min-height), and
+   a table wider than its card scrolls sideways inside it with the row names held on the left. The tones below win over
+   the held cell's fill. */
+.phone .card.grid .gc { overflow-wrap: normal; }
+.phone .card.grid .gs.scroll { overflow-x: auto; overscroll-behavior-x: contain; touch-action: pan-x; background: inherit; }
+.phone .card.grid .gs.scroll .gr { background: inherit; }
+.phone .card.grid .gs.scroll .gc:first-child { position: sticky; left: 0; z-index: 1; background: inherit;
+  box-shadow: 1px 0 0 color-mix(in srgb, currentColor 12%, transparent); }
+.card.grid .gc.s0 { background: color-mix(in srgb, var(--warn) 26%, transparent); }
+.card.grid .gc.s1 { background: color-mix(in srgb, var(--warn) 12%, transparent); }
+.card.grid .gc.s2 { background: color-mix(in srgb, var(--core) 12%, transparent); }
+.card.grid .gc.s3 { background: color-mix(in srgb, var(--out) 14%, transparent); }
+.card.grid .gc.s4 { background: color-mix(in srgb, var(--out) 28%, transparent); }
+.sketch .card.grid .gc { font-family: "IBM Plex Sans", -apple-system, system-ui, sans-serif; }
+
+/* a folded group: a dashed stack of cards with its count; a click unfolds it */
+.card.fold { cursor: pointer; border-style: dashed; box-shadow: var(--shadow), 4px 4px 0 -1.5px var(--bg), 4px 4px 0 0 var(--plain); }
+.card.fold .body { text-align: left; }
+.card.fold .cnt { margin-top: 2px; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--muted); letter-spacing: .02em; }
+
+/* radial mindmap: each branch of the root in one colour family (plain cards only; a kind keeps its own colour) */
+.card.k-plain.b-0 { border-color: var(--src); --kc: var(--src); }
+.card.k-plain.b-1 { border-color: var(--core); --kc: var(--core); }
+.card.k-plain.b-2 { border-color: var(--out); --kc: var(--out); }
+.card.k-plain.b-3 { border-color: var(--info); --kc: var(--info); }
+.card.k-plain.b-4 { border-color: var(--warn); --kc: var(--warn); }

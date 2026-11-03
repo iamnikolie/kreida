@@ -1,0 +1,8 @@
+nodes:
+  a:
+    title: A
+    text: |
+      line one
+      line two
+    kind: src
+style: sketch

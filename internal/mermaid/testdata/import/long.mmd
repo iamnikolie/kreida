@@ -1,0 +1,12 @@
+flowchart TB
+  subgraph S1[Alpha]
+    direction LR
+    a1["<b>One</b><br/><span class=d>x, y</span>"]:::src
+    a2["<b>Two</b>"]:::core
+    a1 --> a2
+  end
+  subgraph S2[Beta]
+    b1["<b>Three</b>"]:::out
+  end
+  S1 ~~~ S2
+  a2 -->|go| b1

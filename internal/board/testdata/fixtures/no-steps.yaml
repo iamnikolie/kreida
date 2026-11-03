@@ -1,0 +1,2 @@
+groups: { g: G }
+nodes: { a: { group: g }, x: X }

@@ -1,0 +1,9 @@
+nodes:
+  intro: { title: Что решили, kind: note, text: "## Итог\n**Бот** отвечает сам.\n- первое\n- [сайт](https://example.com)" }
+  crm: { title: CRM, text: webhook шлёт событие }
+questions:
+  - Кто подписывает?
+  - { text: Сколько в месяц, on: crm, done: true }
+terms:
+  CRM: база клиентов
+  webhook: { text: адрес для событий, aka: [вебхук] }

@@ -1,0 +1,74 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "lanes",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "reviewer",
+      "label": "Редактор",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "author",
+      "label": "Автор",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "k1",
+      "title": "Дать доступ",
+      "text": "",
+      "kind": "src",
+      "group": "reviewer",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c1",
+      "title": "Изучить базу",
+      "text": "",
+      "kind": "core",
+      "group": "author",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c0",
+      "title": "Мокап",
+      "text": "",
+      "kind": "core",
+      "group": "author",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 0,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-k1-c1",
+      "from": "k1",
+      "to": "c1",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

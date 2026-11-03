@@ -1,0 +1,6 @@
+nodes:
+  a:
+    title: Alpha
+    kind: src
+    text: more
+  b: B

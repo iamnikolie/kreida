@@ -1,0 +1,4 @@
+{
+  "yaml": false,
+  "message": "node a: unknown key \"\u003c\u003c\" — quote values that contain commas or colons"
+}

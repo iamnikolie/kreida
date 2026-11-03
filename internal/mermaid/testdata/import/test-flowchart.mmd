@@ -1,0 +1,12 @@
+%% title: T
+flowchart LR
+  A[Start] -->|"yes"| B(Round) --> C{Decide}
+  C == big ==> D[(DB)]
+  A & B -.-> E:::warn
+  my-node-->F
+  C -- no --> A
+  subgraph g1 [Group one]
+    direction TB
+    X["<b>Title</b><br/>second line"]
+  end
+  class F out

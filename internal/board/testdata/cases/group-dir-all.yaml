@@ -1,0 +1,6 @@
+groups:
+  a: { label: A, direction: LR }
+  b: { label: B, direction: RL }
+  c: { label: C, direction: TB }
+  d: { label: D, direction: BT }
+  e: { label: E, direction: lr }

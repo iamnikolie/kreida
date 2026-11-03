@@ -1,0 +1,61 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "lanes",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "A",
+      "label": "A",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "B",
+      "label": "B",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "m1",
+      "title": "Bold",
+      "text": "→ B",
+      "kind": "plain",
+      "group": "A",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 0,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m2",
+      "title": "quoted",
+      "text": "→ A",
+      "kind": "p2",
+      "group": "B",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 1,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-m1-m2",
+      "from": "m1",
+      "to": "m2",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

@@ -1,0 +1,3 @@
+nodes:
+  t: { fields: nope }
+  u: { fields: [] }

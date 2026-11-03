@@ -1,0 +1,29 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [
+    {
+      "kind": "src",
+      "label": "Входы"
+    },
+    {
+      "kind": "core",
+      "label": "Обработка"
+    },
+    {
+      "kind": "out",
+      "label": "5"
+    },
+    {
+      "kind": "warn",
+      "label": ""
+    }
+  ],
+  "groups": [],
+  "nodes": [],
+  "edges": [],
+  "steps": []
+}

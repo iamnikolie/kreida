@@ -1,0 +1,21 @@
+title: How a request becomes a reply
+sub: Nothing reaches the client without the manager's OK
+style: sketch
+direction: LR
+legend: { src: Comes in, core: Assistant does, who: A person decides, out: Client gets }
+nodes:
+  tg: { title: Telegram request, text: the client writes in chat, kind: src, icon: telegram }
+  read: { title: Assistant reads it, text: what is needed and by when, kind: core, icon: bot }
+  draft: { title: Draft reply, text: "price, timing, options", kind: core, icon: file-text }
+  ok: { title: Manager presses OK, text: nothing goes out without it, kind: who, icon: check }
+  reply: { title: Reply to the client, text: in the same chat, kind: out, icon: send }
+  crm: { title: Saved to the CRM, text: card and status, kind: out, icon: database }
+edges:
+  - tg -> read -> draft -> ok -> reply -> crm
+steps:
+  - { title: Request arrives, show: [tg] }
+  - { title: Assistant reads it, show: [read] }
+  - { title: Draft is ready, show: [draft] }
+  - { title: Manager presses OK, show: [ok] }
+  - { title: Client gets the reply, show: [reply] }
+  - { title: Saved to the CRM, show: [crm] }

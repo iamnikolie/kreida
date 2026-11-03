@@ -1,0 +1,41 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "g1",
+      "label": "G1",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "g2",
+      "label": "G2",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "A",
+      "text": "",
+      "kind": "plain",
+      "group": "g2",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [],
+  "steps": []
+}

@@ -1,0 +1,3 @@
+groups: { g: G }
+nodes:
+  t: { fields: [id, "g_id -> g"] }

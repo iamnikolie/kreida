@@ -1,0 +1,22 @@
+%% title: Title: with colon
+%% sub: кто что делает и в каком порядке
+%% legend: src Приходит | core Делает ассистент | out Решает человек
+flowchart LR
+  subgraph client["Клиент"]
+    c1["Пишет запрос<br/>Telegram или почта"]:::src
+    c2["Получает ответ"]:::src
+  end
+  subgraph bot["Ассистент"]
+    b1["Разбирает запрос"]:::core
+    b2["Готовит ответ<br/>черновик + подборка"]:::core
+  end
+  subgraph human["Редактор"]
+    h1["Проверяет и жмёт «ОК»"]:::out
+  end
+  c1 --> b1
+  b1 --> b2
+  b2 --> h1
+  h1 --> c2
+  classDef src stroke:#4a7fd4,stroke-width:1.6px
+  classDef core stroke:#d4943a,stroke-width:1.6px
+  classDef out stroke:#4f9a62,stroke-width:1.6px

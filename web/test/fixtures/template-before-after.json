@@ -1,0 +1,186 @@
+{
+  "title": "Title: with colon",
+  "sub": "→ чтобы показать шаги",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [
+    {
+      "kind": "warn",
+      "label": "Боль сейчас"
+    },
+    {
+      "kind": "core",
+      "label": "Делает ассистент"
+    },
+    {
+      "kind": "out",
+      "label": "Результат"
+    }
+  ],
+  "groups": [
+    {
+      "id": "now",
+      "label": "Сейчас",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "next",
+      "label": "С ассистентом",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "in",
+      "title": "Запрос клиента",
+      "text": "",
+      "kind": "who",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "n1",
+      "title": "Читает вручную",
+      "text": "вечером",
+      "kind": "warn",
+      "group": "now",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "n2",
+      "title": "Ищет по таблицам",
+      "text": "30 минут",
+      "kind": "warn",
+      "group": "now",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "n3",
+      "title": "Отвечает",
+      "text": "",
+      "kind": "plain",
+      "group": "now",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a1",
+      "title": "Ассистент разбирает",
+      "text": "сразу",
+      "kind": "core",
+      "group": "next",
+      "icon": "bot",
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a2",
+      "title": "Готовит подборку",
+      "text": "2 минуты",
+      "kind": "core",
+      "group": "next",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a3",
+      "title": "Человек жмёт «ОК»",
+      "text": "",
+      "kind": "out",
+      "group": "next",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-in-n1",
+      "from": "in",
+      "to": "n1",
+      "label": ""
+    },
+    {
+      "id": "e1-n1-n2",
+      "from": "n1",
+      "to": "n2",
+      "label": ""
+    },
+    {
+      "id": "e2-n2-n3",
+      "from": "n2",
+      "to": "n3",
+      "label": ""
+    },
+    {
+      "id": "e3-in-a1",
+      "from": "in",
+      "to": "a1",
+      "label": ""
+    },
+    {
+      "id": "e4-a1-a2",
+      "from": "a1",
+      "to": "a2",
+      "label": ""
+    },
+    {
+      "id": "e5-a2-a3",
+      "from": "a2",
+      "to": "a3",
+      "label": ""
+    }
+  ],
+  "steps": [
+    {
+      "title": "Сейчас",
+      "show": [
+        "now"
+      ],
+      "hide": []
+    },
+    {
+      "title": "С ассистентом",
+      "show": [
+        "next"
+      ],
+      "hide": [
+        "now"
+      ]
+    }
+  ]
+}

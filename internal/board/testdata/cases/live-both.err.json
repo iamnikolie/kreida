@@ -1,0 +1,4 @@
+{
+  "yaml": false,
+  "message": "node a: live needs exactly one of cmd, url"
+}

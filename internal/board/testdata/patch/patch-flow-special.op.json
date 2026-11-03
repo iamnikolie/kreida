@@ -1,0 +1,7 @@
+{
+  "doc": "doc1",
+  "op": "patchNode",
+  "id": "a",
+  "title": "Title: with colon",
+  "text": "# hash, comma"
+}

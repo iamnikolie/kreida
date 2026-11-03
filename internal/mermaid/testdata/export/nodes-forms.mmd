@@ -1,0 +1,12 @@
+flowchart LR
+  subgraph s1["Новая запись"]
+    direction LR
+    a1["Анкета в Telegram<br/>тема, описание"]:::src
+    b1["Заводит карточку<br/>проверяет дубли"]:::core
+  end
+  reviewer(["Редактор"]):::who
+  idea["Просто карточка<br/>без цвета"]
+  w(["Wide"])
+  classDef src stroke:#4a7fd4,stroke-width:1.6px
+  classDef core stroke:#d4943a,stroke-width:1.6px
+  classDef who stroke:#222,stroke-width:1.6px

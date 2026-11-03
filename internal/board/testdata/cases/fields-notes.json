@@ -1,0 +1,124 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "t",
+      "title": "users",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": [
+        {
+          "name": "id",
+          "ref": null,
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "name",
+          "ref": null,
+          "dashed": false,
+          "note": "the name"
+        },
+        {
+          "name": "status",
+          "ref": null,
+          "dashed": false,
+          "note": "клиент / лид"
+        },
+        {
+          "name": "email",
+          "ref": null,
+          "dashed": false,
+          "note": "unique"
+        },
+        {
+          "name": "plan_id",
+          "ref": "plans",
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "plan2_id",
+          "ref": "plans",
+          "dashed": false,
+          "note": "with note"
+        },
+        {
+          "name": "opt_id",
+          "ref": "others",
+          "dashed": true,
+          "note": "optional"
+        },
+        {
+          "name": "spaced",
+          "ref": null,
+          "dashed": false,
+          "note": "note"
+        }
+      ],
+      "live": null
+    },
+    {
+      "id": "plans",
+      "title": "plans",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "others",
+      "title": "others",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-plans-t-plan_id",
+      "from": "plans",
+      "to": "t",
+      "label": "",
+      "toPort": "plan_id"
+    },
+    {
+      "id": "e1-plans-t-plan2_id",
+      "from": "plans",
+      "to": "t",
+      "label": "",
+      "toPort": "plan2_id"
+    },
+    {
+      "id": "e2-others-t-opt_id",
+      "from": "others",
+      "to": "t",
+      "label": "",
+      "dashed": true,
+      "toPort": "opt_id"
+    }
+  ],
+  "steps": []
+}

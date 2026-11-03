@@ -1,0 +1,7 @@
+nodes:
+  a:
+    title: A2
+    text: |
+      line one
+      line two
+    kind: src

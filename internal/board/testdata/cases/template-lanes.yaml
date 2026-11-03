@@ -1,0 +1,16 @@
+title: "Title: with colon"
+sub: кто что делает и в каком порядке
+layout: lanes
+legend: { src: Приходит, core: Делает ассистент, out: Решает человек }
+groups:
+  client: Клиент
+  bot: Ассистент
+  human: Редактор
+nodes:
+  c1: { title: Пишет запрос, text: Telegram или почта, kind: src, group: client, icon: message-circle }
+  b1: { title: Разбирает запрос, kind: core, group: bot, icon: bot }
+  b2: { title: Готовит ответ, text: черновик + подборка, kind: core, group: bot }
+  h1: { title: Проверяет и жмёт «ОК», kind: out, group: human, icon: check }
+  c2: { title: Получает ответ, kind: src, group: client }
+edges:
+  - c1 -> b1 -> b2 -> h1 -> c2

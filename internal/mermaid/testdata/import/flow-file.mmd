@@ -1,0 +1,41 @@
+%% title: Как команда обрабатывает запросы
+%% sub: Ответ отправляется после проверки
+%% legend: src Что приходит | core Что делает ассистент | out Результат для команды
+flowchart TB
+  classDef src stroke-width:1.6px
+  classDef core stroke-width:1.6px
+  classDef out stroke-width:1.6px
+
+  subgraph S1[Новая запись]
+    direction LR
+    a1["<b>Анкета в Telegram</b><br/><span class=d>тема, описание, контакты</span>"]:::src
+    b1["<b>Заводит карточку</b><br/><span class=d>проверяет дубли, раскладывает поля</span>"]:::core
+    c1["<b>Запись в базе</b><br/><span class=d>+ «не хватает описания»</span>"]:::out
+    a1 --> b1 --> c1
+  end
+
+  subgraph S2[Запрос клиента]
+    direction LR
+    a2["<b>«3 заявки на проверку»</b><br/><span class=d>письмо или сообщение</span>"]:::src
+    b2["<b>Подбирает по базе</b><br/><span class=d>тема, срок, статус</span>"]:::core
+    c2["<b>Шорт-лист</b><br/><span class=d>список записей и черновик ответа</span>"]:::out
+    a2 --> b2 --> c2
+  end
+
+  subgraph S3[Почта]
+    direction LR
+    a3["<b>Входящие письма</b><br/><span class=d>вопросы, заявки, обновления</span>"]:::src
+    b3["<b>Разбирает и пишет</b><br/><span class=d>важное наверх, черновики ответов</span>"]:::core
+    c3["<b>Кнопка «Отправить»</b><br/><span class=d>в Telegram, одним нажатием</span>"]:::out
+    a3 --> b3 --> c3
+  end
+
+  subgraph S4[Каждое утро]
+    direction LR
+    a4["<b>Задачи и сроки</b><br/><span class=d>проверки, напоминания, ответы</span>"]:::src
+    b4["<b>Собирает сводку</b><br/><span class=d>что горит, что ждёт ответа</span>"]:::core
+    c4["<b>Утренняя сводка</b><br/><span class=d>план дня в одном сообщении</span>"]:::out
+    a4 --> b4 --> c4
+  end
+
+  S1 ~~~ S2 ~~~ S3 ~~~ S4

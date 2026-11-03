@@ -1,0 +1,18 @@
+.note-backdrop { all: unset; position: fixed; inset: 0; z-index: 30; }
+.note-box { position: fixed; z-index: 31; box-sizing: border-box; padding: 14px; border-radius: 14px; background: var(--card); color: var(--fg);
+  box-shadow: 0 2px 6px rgba(0,0,0,.12), 0 18px 40px rgba(0,0,0,.18); font: 400 13px/18px "IBM Plex Sans", -apple-system, system-ui, sans-serif; }
+.note-box h2 { margin: 0 0 10px; font-size: 13px; font-weight: 600; }
+.note-box .thread { list-style: none; margin: 0 0 10px; padding: 0; max-height: 180px; overflow: auto; display: grid; gap: 8px; }
+.note-box .thread li { padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--core) 12%, transparent); }
+.note-box .thread li.done { opacity: .6; }
+.note-box .thread p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.note-box .thread small { color: var(--sub); font-size: 11.5px; }
+.note-box textarea { box-sizing: border-box; width: 100%; min-height: 84px; resize: vertical; padding: 8px 10px; border-radius: 10px;
+  border: 1px solid var(--zone-line); background: var(--bg); color: var(--fg); font: inherit; outline: none; }
+.note-box textarea:focus { border-color: var(--src); }
+.note-box .acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.note-box .acts button { all: unset; padding: 6px 12px; border-radius: 8px; cursor: pointer; color: var(--pill-fg); }
+.note-box .acts button:hover { background: color-mix(in srgb, var(--edge) 18%, transparent); }
+.note-box .acts .go { background: var(--fg); color: var(--bg); font-weight: 600; }
+.note-box .acts .go:hover { background: var(--fg); opacity: .9; }
+.note-box .acts .go:disabled { opacity: .35; cursor: default; }

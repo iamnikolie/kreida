@@ -1,0 +1,21 @@
+title: "Title: with colon"
+layout: radial
+nodes:
+  root: { title: "Title: with colon", kind: who }
+  a: Первая ветка
+  a1: Идея
+  a2: Идея
+  b: Вторая ветка
+  b1: Идея
+  c: Третья ветка
+  c1: Идея
+  c2: Идея
+edges:
+  - root -> a
+  - root -> b
+  - root -> c
+  - a -> a1
+  - a -> a2
+  - b -> b1
+  - c -> c1
+  - c -> c2

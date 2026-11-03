@@ -1,0 +1,6 @@
+title: CRLF
+nodes:
+  a: { title: A }
+  b: B
+edges:
+  - a -> b

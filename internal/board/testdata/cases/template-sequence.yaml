@@ -1,0 +1,14 @@
+title: "Title: with colon"
+sub: сообщения по порядку
+layout: lanes
+groups:
+  client: Клиент
+  bot: Ассистент
+  human: Редактор
+nodes:
+  m1: { title: Запрос, text: → Ассистент, group: client, step: 0 }
+  m2: { title: Черновик ответа, text: → Редактор, group: bot, step: 1 }
+  m3: { title: «ОК», text: → Ассистент, group: human, step: 2 }
+  m4: { title: Ответ клиенту, text: → Клиент, group: bot, step: 3, kind: out }
+edges:
+  - m1 -> m2 -> m3 -> m4

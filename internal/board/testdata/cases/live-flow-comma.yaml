@@ -1,0 +1,2 @@
+nodes:
+  a: { live: { cmd: echo a, b } }

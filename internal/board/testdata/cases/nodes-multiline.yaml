@@ -1,0 +1,15 @@
+nodes:
+  a:
+    title: Literal
+    text: |
+      line one
+      line two
+  b:
+    title: Folded
+    text: >
+      folded one
+      folded two
+  c: "first
+    second"
+  d: plain first
+    plain second

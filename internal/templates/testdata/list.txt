@@ -1,0 +1,8 @@
+flow           process left to right: inputs -> processing -> results
+lanes          swimlane — who does what, in which order (client / assistant / human)
+sequence       who sends what to whom, message by message (lanes + columns)
+mindmap        one topic branching into ideas (radial, a colour per branch)
+matrix         2×2 — what first: effect × effort, quick wins tinted
+compare        options × criteria as a table card, the decision as a note
+schema         data schema / ERD — tables with fields, FK rows linked
+before-after   now vs with the assistant, revealed as two presentation steps

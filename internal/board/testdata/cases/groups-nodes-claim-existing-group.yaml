@@ -1,0 +1,5 @@
+groups:
+  g1: { label: G1, nodes: [a] }
+  g2: { label: G2, nodes: [a] }
+nodes:
+  a: { title: A, group: zzz }
