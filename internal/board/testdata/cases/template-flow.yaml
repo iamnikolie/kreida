@@ -1,0 +1,10 @@
+title: "Title: with colon"
+sub: ""
+direction: LR
+legend: { src: Входы, core: Обработка, out: Результат }
+nodes:
+  a: { title: Начало, text: откуда приходит, kind: src }
+  b: { title: Обработка, kind: core }
+  c: { title: Результат, kind: out }
+edges:
+  - a -> b -> c

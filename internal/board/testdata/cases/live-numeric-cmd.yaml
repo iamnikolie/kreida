@@ -1,0 +1,2 @@
+nodes:
+  a: { live: { cmd: 42 } }

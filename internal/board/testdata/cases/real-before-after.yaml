@@ -1,0 +1,11 @@
+direction: LR
+groups:
+  now: { label: Сейчас, direction: TB }
+  next: { label: С ассистентом, direction: TB }
+nodes:
+  in: { title: Запрос, kind: who }
+  w: { title: Руками, kind: warn, group: now }
+  a: { title: Ассистент, kind: core, group: next }
+edges:
+  - in => w
+  - in => a

@@ -1,0 +1,5 @@
+nodes:
+  a:
+    title: A
+    kind: src
+  b: Bee | more

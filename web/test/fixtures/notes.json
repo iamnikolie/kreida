@@ -1,0 +1,63 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "intro",
+      "title": "Что решили",
+      "text": "## Итог\n**Бот** отвечает сам.\n- первое\n- [сайт](https://example.com)",
+      "kind": "note",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "crm",
+      "title": "CRM",
+      "text": "webhook шлёт событие",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [],
+  "steps": [],
+  "questions": [
+    {
+      "text": "Кто подписывает?"
+    },
+    {
+      "text": "Сколько в месяц",
+      "done": true,
+      "on": "crm"
+    }
+  ],
+  "terms": [
+    {
+      "term": "CRM",
+      "text": "база клиентов",
+      "aka": []
+    },
+    {
+      "term": "webhook",
+      "text": "адрес для событий",
+      "aka": [
+        "вебхук"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+layout: radial
+nodes:
+  root: Идеи
+  a: Продажи
+  a1: Звонки
+  a2: Письма
+  b: Продукт
+  b1: Бот
+  c: Найм
+edges:
+  - root -> a -> a1
+  - a -> a2
+  - root -> b -> b1
+  - root -> c

@@ -1,0 +1,2 @@
+nodes:
+  t: { fields: [id, id] }

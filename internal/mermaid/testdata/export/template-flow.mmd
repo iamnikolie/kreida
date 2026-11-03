@@ -1,0 +1,11 @@
+%% title: Title: with colon
+%% legend: src Входы | core Обработка | out Результат
+flowchart LR
+  a["Начало<br/>откуда приходит"]:::src
+  b["Обработка"]:::core
+  c["Результат"]:::out
+  a --> b
+  b --> c
+  classDef src stroke:#4a7fd4,stroke-width:1.6px
+  classDef core stroke:#d4943a,stroke-width:1.6px
+  classDef out stroke:#4f9a62,stroke-width:1.6px

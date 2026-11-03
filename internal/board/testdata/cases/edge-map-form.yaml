@@ -1,0 +1,6 @@
+edges:
+  - { from: a, to: b, label: да, animated: true }
+  - { from: b, to: c, dashed: true, hidden: false, thick: yes }
+  - { from: c, to: d, dashed: "false" }
+  - { from: d }
+  - { to: e }

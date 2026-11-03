@@ -1,0 +1,177 @@
+{
+  "title": "Что строим",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "what",
+      "label": "Что это",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "product",
+      "label": "Продукт",
+      "kind": null,
+      "direction": null,
+      "parent": "what"
+    },
+    {
+      "id": "scope",
+      "label": "Объём",
+      "kind": null,
+      "direction": null,
+      "parent": "what",
+      "collapsed": true
+    },
+    {
+      "id": "docs",
+      "label": "Документация",
+      "kind": null,
+      "direction": null,
+      "parent": "what"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "client",
+      "title": "Клиент",
+      "text": "",
+      "kind": "who",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "p1",
+      "title": "Бот",
+      "text": "",
+      "kind": "plain",
+      "group": "product",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "p2",
+      "title": "Админка",
+      "text": "",
+      "kind": "plain",
+      "group": "product",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "s1",
+      "title": "20 сценариев",
+      "text": "",
+      "kind": "plain",
+      "group": "scope",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "s2",
+      "title": "3 интеграции",
+      "text": "",
+      "kind": "plain",
+      "group": "scope",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "d1",
+      "title": "Инструкция",
+      "text": "",
+      "kind": "plain",
+      "group": "docs",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "out",
+      "title": "Запуск",
+      "text": "",
+      "kind": "out",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-client-p1",
+      "from": "client",
+      "to": "p1",
+      "label": ""
+    },
+    {
+      "id": "e1-p1-p2",
+      "from": "p1",
+      "to": "p2",
+      "label": ""
+    },
+    {
+      "id": "e2-client-s1",
+      "from": "client",
+      "to": "s1",
+      "label": ""
+    },
+    {
+      "id": "e3-p2-s2",
+      "from": "p2",
+      "to": "s2",
+      "label": ""
+    },
+    {
+      "id": "e4-s1-d1",
+      "from": "s1",
+      "to": "d1",
+      "label": ""
+    },
+    {
+      "id": "e5-s2-d1",
+      "from": "s2",
+      "to": "d1",
+      "label": ""
+    },
+    {
+      "id": "e6-d1-out",
+      "from": "d1",
+      "to": "out",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

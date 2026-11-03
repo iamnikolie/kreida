@@ -1,0 +1,80 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "a",
+      "label": "A",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "b",
+      "label": "B",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "x",
+      "title": "x",
+      "text": "",
+      "kind": "plain",
+      "group": "a",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "y",
+      "title": "y",
+      "text": "",
+      "kind": "plain",
+      "group": "b",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "z",
+      "title": "z",
+      "text": "",
+      "kind": "plain",
+      "group": "a",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-x-y",
+      "from": "x",
+      "to": "y",
+      "label": ""
+    },
+    {
+      "id": "e1-y-z",
+      "from": "y",
+      "to": "z",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

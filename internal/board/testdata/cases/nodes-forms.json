@@ -1,0 +1,86 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "s1",
+      "label": "Новая запись",
+      "kind": null,
+      "direction": "LR",
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "a1",
+      "title": "Анкета в Telegram",
+      "text": "тема, описание",
+      "kind": "src",
+      "group": "s1",
+      "icon": "send",
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b1",
+      "title": "Заводит карточку",
+      "text": "проверяет дубли",
+      "kind": "core",
+      "group": "s1",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "reviewer",
+      "title": "Редактор",
+      "text": "",
+      "kind": "who",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "idea",
+      "title": "Просто карточка",
+      "text": "без цвета",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "w",
+      "title": "Wide",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": "pill",
+      "width": 320,
+      "step": 2,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [],
+  "steps": []
+}

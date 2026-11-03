@@ -1,0 +1,6 @@
+nodes: { a: A, b: B }
+edges:
+  - a -> b: label
+  - b -> a:
+  - a -.-> b: dashed label
+  - a => b: thick

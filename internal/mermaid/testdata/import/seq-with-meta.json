@@ -1,0 +1,41 @@
+{
+  "title": "Seq",
+  "sub": "",
+  "direction": "LR",
+  "layout": "lanes",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "A",
+      "label": "A",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "B",
+      "label": "B",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "m1",
+      "title": "m",
+      "text": "→ B",
+      "kind": "plain",
+      "group": "A",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 0,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [],
+  "steps": []
+}

@@ -1,0 +1,13 @@
+%% title: Title: with colon
+%% sub: стрелка = «один ко многим»
+%% legend: src Уже есть | core Новое
+flowchart LR
+  clients["clients<br/>id<br/>name<br/>status"]:::src
+  requests["requests<br/>id<br/>client_id → clients<br/>city<br/>dates"]:::core
+  models["models<br/>id<br/>name<br/>status"]:::src
+  picks["request_picks<br/>id<br/>request_id → requests<br/>model_id → models<br/>why"]:::core
+  clients --> requests
+  requests --> picks
+  models --> picks
+  classDef src stroke:#4a7fd4,stroke-width:1.6px
+  classDef core stroke:#d4943a,stroke-width:1.6px

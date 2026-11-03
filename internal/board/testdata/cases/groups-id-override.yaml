@@ -1,0 +1,4 @@
+groups:
+  g: { id: other, label: G }
+nodes:
+  a: { group: other }

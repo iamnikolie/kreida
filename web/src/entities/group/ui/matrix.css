@@ -1,0 +1,18 @@
+/* layout: matrix */
+.matrix { position: relative; width: 100%; height: 100%; }
+.matrix .mq { position: absolute; box-sizing: border-box; border: 1px solid var(--zone-line); background: var(--zone); }
+.matrix .mq.hot { background: color-mix(in srgb, var(--out) 13%, var(--zone)); border-color: color-mix(in srgb, var(--out) 40%, var(--zone-line)); }
+.matrix .mql { position: absolute; top: 13px; left: 16px; right: 16px; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.matrix .mq.hot .mql { color: var(--out); }
+.matrix .max { position: absolute; display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 12px; }
+.matrix .max .lbl { font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--fg); opacity: .7; }
+.matrix .max.y { left: 0; flex-direction: column; padding: 10px 0; box-sizing: border-box; }
+.matrix .max.y .lbl { writing-mode: vertical-rl; transform: rotate(180deg); }
+.matrix .max.x { padding: 0 12px; box-sizing: border-box; }
+.matrix .max .hi::after { content: ' ↑'; }
+.matrix .max.x .hi::after { content: ' →'; }
+.matrix .max.x .lo::before { content: '← '; }
+.matrix .max.y .lo::before { content: '↓ '; }
+.matrix .max .hi, .matrix .max .lo { white-space: nowrap; }
+.sketch .matrix .max, .sketch .matrix .mql { font-family: 'Caveat', cursive; font-size: 16px; letter-spacing: .03em; }
+.share .matrix .max, .share .matrix .mql { font-family: inherit; font-size: 12px; }

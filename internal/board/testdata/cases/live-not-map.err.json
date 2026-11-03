@@ -1,0 +1,4 @@
+{
+  "yaml": false,
+  "message": "node a: live must be a map {cmd or url, every}"
+}

@@ -1,0 +1,22 @@
+title: Что строим
+direction: LR
+groups:
+  what: Что это
+  product: { label: Продукт, parent: what }
+  scope: { label: Объём, parent: what, collapsed: true }
+  docs: { label: Документация, parent: what }
+nodes:
+  client: { title: Клиент, kind: who }
+  p1: { title: Бот, group: product }
+  p2: { title: Админка, group: product }
+  s1: { title: 20 сценариев, group: scope }
+  s2: { title: 3 интеграции, group: scope }
+  d1: { title: Инструкция, group: docs }
+  out: { title: Запуск, kind: out }
+edges:
+  - client -> p1 -> p2
+  - client -> s1
+  - p2 -> s2
+  - s1 -> d1
+  - s2 -> d1
+  - d1 -> out

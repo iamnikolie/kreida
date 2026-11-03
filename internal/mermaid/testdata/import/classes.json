@@ -1,0 +1,85 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "TB",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "a",
+      "text": "",
+      "kind": "src",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b",
+      "title": "b",
+      "text": "",
+      "kind": "core",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c",
+      "title": "c",
+      "text": "",
+      "kind": "out",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "d",
+      "title": "d",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "e",
+      "title": "e",
+      "text": "",
+      "kind": "warn",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-a-b",
+      "from": "a",
+      "to": "b",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

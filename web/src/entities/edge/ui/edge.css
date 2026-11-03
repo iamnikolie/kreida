@@ -1,0 +1,21 @@
+/* edges */
+.react-flow__edge-path { stroke: var(--edge); stroke-width: 1.7; }
+.react-flow__edge.dashed .react-flow__edge-path { stroke-dasharray: 6 5; }
+.react-flow__edge.thick .react-flow__edge-path { stroke-width: 3; }
+.react-flow__arrowhead polyline { stroke: var(--edge) !important; fill: var(--edge) !important; }
+.react-flow__edge-textbg { fill: var(--pill); filter: drop-shadow(0 1px 1.5px rgba(0,0,0,.1)); }
+.react-flow__edge-text { fill: var(--pill-fg); font-size: 12px; font-family: inherit; }
+
+/* sketch style: rough.js redraws the line, Caveat for the label */
+.rough-edge { fill: none; stroke: var(--edge); stroke-width: 1.6; }
+.react-flow__edge.thick .rough-edge { stroke-width: 3; }
+.sketch .react-flow__edge-text { font-family: 'Caveat', cursive; font-size: 15px; }
+/* a client's page: edge labels are Plex in every style (D-2026-10-29-03, row i) */
+.share .react-flow__edge-text { font-family: inherit; font-size: 12px; }
+
+/* radial mindmap: a branch's edges in its colour family */
+.react-flow__edge.b-0 .react-flow__edge-path, .react-flow__edge.b-0 .rough-edge { stroke: var(--src); }
+.react-flow__edge.b-1 .react-flow__edge-path, .react-flow__edge.b-1 .rough-edge { stroke: var(--core); }
+.react-flow__edge.b-2 .react-flow__edge-path, .react-flow__edge.b-2 .rough-edge { stroke: var(--out); }
+.react-flow__edge.b-3 .react-flow__edge-path, .react-flow__edge.b-3 .rough-edge { stroke: var(--info); }
+.react-flow__edge.b-4 .react-flow__edge-path, .react-flow__edge.b-4 .rough-edge { stroke: var(--warn); }

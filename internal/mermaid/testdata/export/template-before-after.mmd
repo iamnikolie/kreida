@@ -1,0 +1,25 @@
+%% title: Title: with colon
+%% sub: → чтобы показать шаги
+%% legend: warn Боль сейчас | core Делает ассистент | out Результат
+flowchart LR
+  subgraph now["Сейчас"]
+    n1["Читает вручную<br/>вечером"]:::warn
+    n2["Ищет по таблицам<br/>30 минут"]:::warn
+    n3["Отвечает"]
+  end
+  subgraph next["С ассистентом"]
+    a1["Ассистент разбирает<br/>сразу"]:::core
+    a2["Готовит подборку<br/>2 минуты"]:::core
+    a3["Человек жмёт «ОК»"]:::out
+  end
+  in(["Запрос клиента"]):::who
+  in --> n1
+  n1 --> n2
+  n2 --> n3
+  in --> a1
+  a1 --> a2
+  a2 --> a3
+  classDef who stroke:#222,stroke-width:1.6px
+  classDef warn stroke:#d0574b,stroke-width:1.6px
+  classDef core stroke:#d4943a,stroke-width:1.6px
+  classDef out stroke:#4f9a62,stroke-width:1.6px

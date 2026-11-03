@@ -1,0 +1,38 @@
+title: Обработка запросов
+sub: Учебный пример с таблицей и открытыми вопросами
+direction: LR
+legend: { src: Приходит, core: Делает ассистент, out: Решает человек, note: Решение }
+terms:
+  CRM: { text: "база запросов и контактов", aka: [црм] }
+  webhook: { text: "адрес, на который Telegram сам присылает каждое новое сообщение", aka: [вебхук] }
+  SLA: время, за которое клиент получает первый ответ
+groups:
+  what: Что это
+  product: { label: Продукт, parent: what }
+  scope: { label: Объём, parent: what }
+  docs: { label: Решение, parent: what }
+nodes:
+  tg: { title: Заявка в Telegram, text: приходит через webhook, kind: src }
+  bot: { title: Разбирает заявку, text: заводит карточку в CRM, kind: core, group: product, icon: bot }
+  draft: { title: Черновик ответа, text: "подтверждение получения запроса", kind: core, group: product, icon: file-text }
+  store:
+    title: Где хранить клиентов
+    group: scope
+    cols: [Вариант, Цена, Запуск, Риск]
+    rows:
+      - [Готовая база, { text: $0, score: 2 }, { text: день, score: 2 }, { text: низкий, score: 1 }]
+      - [Общая таблица, { text: $20/мес, score: 0 }, { text: день, score: 2 }, { text: лимиты, score: -1 }]
+      - [Собственная система, { text: $0, score: 2 }, { text: месяц, score: -2 }, { text: высокий, score: -2 }]
+  decision:
+    title: Что решили
+    kind: note
+    group: docs
+    text: "## Пилот\n**Начать** с готовой базы.\n- Проверить импорт записей"
+  review: { title: Редактор проверяет ответ, kind: out, icon: check }
+edges:
+  - tg -> bot -> draft -> review
+  - store -> decision
+questions:
+  - { text: Кто проверяет ответы?, on: review }
+  - { text: Как часто обновлять записи?, on: store }
+  - { text: Проверить доступ к базе, done: true, on: bot }

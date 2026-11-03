@@ -1,0 +1,106 @@
+{
+  "title": "Title: with colon",
+  "sub": "сообщения по порядку",
+  "direction": "LR",
+  "layout": "lanes",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "client",
+      "label": "Клиент",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "bot",
+      "label": "Ассистент",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "human",
+      "label": "Редактор",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "m1",
+      "title": "Запрос",
+      "text": "→ Ассистент",
+      "kind": "plain",
+      "group": "client",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 0,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m2",
+      "title": "Черновик ответа",
+      "text": "→ Редактор",
+      "kind": "plain",
+      "group": "bot",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 1,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m3",
+      "title": "«ОК»",
+      "text": "→ Ассистент",
+      "kind": "plain",
+      "group": "human",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 2,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "m4",
+      "title": "Ответ клиенту",
+      "text": "→ Клиент",
+      "kind": "out",
+      "group": "bot",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": 3,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-m1-m2",
+      "from": "m1",
+      "to": "m2",
+      "label": ""
+    },
+    {
+      "id": "e1-m2-m3",
+      "from": "m2",
+      "to": "m3",
+      "label": ""
+    },
+    {
+      "id": "e2-m3-m4",
+      "from": "m3",
+      "to": "m4",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

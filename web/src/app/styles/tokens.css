@@ -1,0 +1,39 @@
+:root {
+  /* the safe area: what a notch or the home indicator takes from an edge (viewport-fit=cover lets the page reach under it).
+     Everything that sits at an edge adds these; set one by hand on <html> to try a device that has them. */
+  --safe-top: env(safe-area-inset-top, 0px); --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px); --safe-left: env(safe-area-inset-left, 0px);
+  --bg: #f4f2ee; --dot: #d3cec4; --fg: #22211f; --muted: #8c877d; --err: #b3261e;
+  /* a client's page, where the quiet text must still read: a card's second line (4.5:1 or more on every card fill, which --muted is
+     not: 3.1:1 on the tints), the subtitle and the owner's name (on the page) */
+  --sub: #69645a;
+  --card: #ffffff; --edge: #a39d92; --pill: #ffffff; --pill-fg: #6f6a60; --panel: rgba(255,255,255,.82);
+  --zone: rgba(255,255,255,.5); --zone-line: #e2ddd3;
+  --shadow: 0 1px 2px rgba(40,35,25,.06), 0 6px 18px rgba(40,35,25,.08);
+  --src: #5873b5;  --src-bg: #eef2fb;
+  --core: #c07b33; --core-bg: #fbf0e2;
+  --out: #3d8b5b;  --out-bg: #e8f4ed;
+  --warn: #b8433a; --warn-bg: #fbeceb;
+  --info: #7a5bb5; --info-bg: #f2eefa;
+  --p2: #b3aea4;   --p2-bg: transparent; --p2-fg: #958f84;
+  --who: #22211f;  --who-bg: #22211f; --who-fg: #f7f5f0;
+  --note: #e9cf5b; --note-bg: #fbeba0; --note-fg: #4a3f12;
+  --plain: #cfc9be; --plain-bg: #ffffff;
+  font-family: "IBM Plex Sans", -apple-system, system-ui, sans-serif;
+}
+[data-theme=dark] {
+  --bg: #141413; --dot: #2c2b28; --fg: #ecebe6; --muted: #8a867d; --err: #ff8a80;
+  --sub: #a09c92;
+  --card: #1e1d1b; --edge: #6d695f; --pill: #252421; --pill-fg: #a39e93; --panel: rgba(30,29,27,.85);
+  --zone: rgba(255,255,255,.025); --zone-line: #2e2d29;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 22px rgba(0,0,0,.35);
+  --src: #86a2e6;  --src-bg: #1b2233;
+  --core: #e3a663; --core-bg: #2a2117;
+  --out: #6cc28d;  --out-bg: #16261d;
+  --warn: #f08a80; --warn-bg: #2d1a18;
+  --info: #b49cf0; --info-bg: #231d33;
+  --p2: #4f4c46;   --p2-fg: #7d796f;
+  --who: #ecebe6;  --who-bg: #ecebe6; --who-fg: #141413;
+  --note: #8a7420; --note-bg: #3a331a; --note-fg: #f3e3a0;
+  --plain: #3a3934; --plain-bg: #1e1d1b;
+}

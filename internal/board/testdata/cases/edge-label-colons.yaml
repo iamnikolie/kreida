@@ -1,0 +1,4 @@
+edges:
+  - "a -> b : spaced"
+  - "a -> b:no space"
+  - "x: y -> z"

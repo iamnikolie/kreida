@@ -1,0 +1,8 @@
+flowchart LR
+  cities["cities<br/>id<br/>name<br/>country"]:::core
+  models["models<br/>id<br/>name<br/>status<br/>city_id → cities<br/>agency_id → agencies"]:::src
+  agencies["agencies<br/>id<br/>name<br/>terms"]:::src
+  cities --> models
+  agencies -.-> models
+  classDef core stroke:#d4943a,stroke-width:1.6px
+  classDef src stroke:#4a7fd4,stroke-width:1.6px

@@ -1,0 +1,15 @@
+flowchart LR
+  subgraph now["Сейчас"]
+    direction TB
+    w["Руками"]:::warn
+  end
+  subgraph next["С ассистентом"]
+    direction TB
+    a["Ассистент"]:::core
+  end
+  in(["Запрос"]):::who
+  in ==> w
+  in ==> a
+  classDef who stroke:#222,stroke-width:1.6px
+  classDef warn stroke:#d0574b,stroke-width:1.6px
+  classDef core stroke:#d4943a,stroke-width:1.6px

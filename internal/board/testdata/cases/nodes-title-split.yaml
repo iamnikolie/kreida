@@ -1,0 +1,8 @@
+nodes:
+  a: { title: "T | sub | more" }
+  b: { title: "T | sub", text: explicit }
+  c: { title: T, text: "x | y" }
+  d: "A | B | C"
+  e: "  A   |   B  "
+  f: "A |B"
+  g: "A| B"

@@ -1,0 +1,3 @@
+nodes:
+  a: { id: zz, title: A }
+  b: { id: 0 }

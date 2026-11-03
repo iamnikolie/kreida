@@ -1,0 +1,50 @@
+/* the margins keep clear of a notch at the sides (--safe-*, tokens.css) */
+.head { margin: 18px 22px 18px calc(22px + var(--safe-left)); pointer-events: none; max-width: 52vw; }
+.head > * { pointer-events: auto; }
+.head h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -.015em; color: var(--fg); }
+.head .sub { color: var(--muted); font-size: 14px; margin-top: 3px; }
+/* whose board it is (kreida cloud): chrome, so IBM Plex Sans 13 on a sketch board too - the sketch rules below name h1 and .sub only */
+.head .from { margin-top: 4px; font: 400 13px/18px "IBM Plex Sans", -apple-system, system-ui, sans-serif; color: var(--sub); }
+.brand { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.logo { font: 600 13px "IBM Plex Mono", monospace; color: var(--muted); letter-spacing: .02em; }
+
+/* sketch style: Caveat. After the rules above on purpose: same specificity, the later one wins. */
+.sketch h1, .sketch .sub { font-family: 'Caveat', cursive; }
+.sketch h1 { font-size: 34px; }
+.sketch .sub { font-size: 19px; }
+
+/* a client's page: the sketch hand is for the board title and the card titles only, so the subtitle stays Plex (row i), and it
+   and the name read at 4.5:1 or more on the page, as a card's second line does (--sub, not --muted: row o) */
+.share .head .sub { font-family: inherit; font-size: 14px; color: var(--sub); }
+
+/* a phone: one line of title, no subtitle (the legend is in the bar's sheet). After the sketch rules so the sizes win. */
+/* The title is a bar (D-2026-10-29-02, row b): opaque, 56 px under the top inset, a hairline below, so nothing runs under it
+   (a fit keeps 64 px clear of the top). Its title takes the whole line, not what the text needs: a hand-drawn glyph's ink
+   overhangs its advance, so a box shrunk to the text clipped the last letter ("test boara") without an ellipsis. A title too
+   long for the line ends in one. */
+.phone .head { left: 0; right: 0; margin: 0; width: auto; max-width: none; box-sizing: border-box; display: flex; align-items: center;
+  height: calc(56px + var(--safe-top)); padding: var(--safe-top) calc(16px + var(--safe-right)) 0 calc(16px + var(--safe-left));
+  background: var(--bg); border-bottom: 1px solid var(--zone-line); }
+.phone .head h1 { flex: 1; min-width: 0; font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 3px; }
+.phone .head .sub { display: none; }
+.phone.sketch .head h1 { font-size: 22px; }
+
+/* with the owner's name the bar is 64 (+ the top inset), not 56: the title 17/22 on one line, the name under it 12/16
+   (D-2026-10-29-03, B). A fit keeps the extra 8 px clear (PHONE_PAD, OWNER_BAR_EXTRA). */
+.phone .head.owned { height: calc(64px + var(--safe-top)); flex-direction: column; align-items: stretch; justify-content: center; }
+.phone .head.owned h1 { flex: none; font-size: 17px; line-height: 22px; }
+/* Caveat sets about 15 % smaller than Plex at one size: on a sketch board the title gets 3 px more, as 20 -> 22 did in the plain bar */
+.phone.sketch .head.owned h1 { font-size: 20px; }
+.phone .head.owned .from { margin: 0; padding-right: 3px; font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* A narrow desktop frame (an embed about 640 px wide, D-2026-10-29-03): the head must not take a third of it. The title is one
+   line and smaller, with an ellipsis; subtitle and name are one line each. While presenting (the toolbar and the legend gone
+   and the steps bar up) the head is a bar like the phone's: opaque, a hairline below, so the edges and the cards of other
+   steps pass under it, not through its text. The fit keeps the board below what the head measures. */
+@media (max-width: 799px) {
+  .share:not(.phone) .head h1 { font-size: 19px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 3px; }
+  .share.sketch:not(.phone) .head h1 { font-size: 26px; }
+  .share:not(.phone) .head .sub, .share:not(.phone) .head .from { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .share.presenting:not(.phone) .head { left: 0; right: 0; width: auto; max-width: none; margin: 0; box-sizing: border-box;
+    padding: 12px calc(16px + var(--safe-right)) 10px calc(16px + var(--safe-left)); background: var(--bg); border-bottom: 1px solid var(--zone-line); }
+}

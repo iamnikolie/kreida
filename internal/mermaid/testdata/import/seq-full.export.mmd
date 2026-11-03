@@ -1,0 +1,29 @@
+flowchart LR
+  subgraph A["Alice"]
+    m1["Hello Bob<br/>→ Bob"]
+    m3["async<br/>→ C"]
+    m5["plain<br/>→ Bob"]
+    m7["activate<br/>→ Bob"]
+    m9["ping<br/>→ Bob"]
+  end
+  subgraph B["Bob"]
+    m2["Hi Alice<br/>→ Alice"]:::p2
+    m6["dotted plain<br/>→ Alice"]:::p2
+    m8["deactivate<br/>→ Alice"]:::p2
+  end
+  subgraph C["C"]
+    m4["lost<br/>→ Alice"]
+  end
+  subgraph D["D"]
+    m10["new participant<br/>→ Alice"]
+  end
+  m1 --> m2
+  m2 --> m3
+  m3 --> m4
+  m4 --> m5
+  m5 --> m6
+  m6 --> m7
+  m7 --> m8
+  m8 --> m9
+  m9 --> m10
+  classDef p2 stroke:#9b968c,stroke-width:1.6px,stroke-dasharray:5 4

@@ -1,0 +1,20 @@
+flowchart TB
+  subgraph one[First]
+    direction LR
+    a --> b
+    subgraph inner [Inner group]
+      c
+    end
+  end
+  subgraph two ["Second one"]
+    d
+  end
+  subgraph Some title with spaces
+    e
+  end
+  subgraph three
+    f
+  end
+  one --> two
+  a --> d
+  b ~~~ e

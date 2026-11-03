@@ -1,0 +1,7 @@
+nodes:
+  a:
+    title: A2
+    live:
+      cmd: echo ok
+      every: 10
+  b: B

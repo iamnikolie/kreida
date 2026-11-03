@@ -1,0 +1,66 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "A",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b",
+      "title": "B",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-a-b",
+      "from": "a",
+      "to": "b",
+      "label": "label"
+    },
+    {
+      "id": "e1-b-a",
+      "from": "b",
+      "to": "a",
+      "label": ""
+    },
+    {
+      "id": "e2-a-b",
+      "from": "a",
+      "to": "b",
+      "label": "dashed label",
+      "dashed": true
+    },
+    {
+      "id": "e3-a-b",
+      "from": "a",
+      "to": "b",
+      "label": "thick",
+      "thick": true
+    }
+  ],
+  "steps": []
+}

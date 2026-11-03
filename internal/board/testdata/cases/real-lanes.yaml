@@ -1,0 +1,7 @@
+layout: lanes
+groups: { reviewer: Редактор, author: Автор }
+nodes:
+  k1: { title: Дать доступ, kind: src, group: reviewer }
+  c1: { title: Изучить базу, kind: core, group: author }
+  c0: { title: Мокап, kind: core, group: author, step: 0 }
+edges: [ k1 -> c1 ]

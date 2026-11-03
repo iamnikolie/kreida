@@ -1,0 +1,22 @@
+%% title: T
+flowchart LR
+  subgraph g1["Group one"]
+    direction TB
+    X["Title<br/>second line"]
+  end
+  A["Start"]
+  B["Round"]
+  C["Decide"]
+  D[("DB")]
+  E["E"]:::warn
+  n8["my-node"]
+  F["F"]:::out
+  A -->|"yes"| B
+  B --> C
+  C ==>|"big"| D
+  A -.-> E
+  B -.-> E
+  n8 --> F
+  C -->|"no"| A
+  classDef warn stroke:#d0574b,stroke-width:1.6px
+  classDef out stroke:#4f9a62,stroke-width:1.6px

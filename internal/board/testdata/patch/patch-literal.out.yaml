@@ -1,0 +1,6 @@
+nodes:
+  a:
+    title: A
+    text: |-
+      plain now
+    kind: src

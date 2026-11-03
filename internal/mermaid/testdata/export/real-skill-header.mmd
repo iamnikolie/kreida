@@ -1,0 +1,28 @@
+%% title: Как команда обрабатывает запросы
+%% sub: Ответ отправляется после проверки
+%% legend: src Что приходит | core Что делает ассистент | out Результат для команды
+flowchart LR
+  subgraph s1["Новая запись"]
+    direction LR
+    a1["Анкета в Telegram<br/>тема, описание"]:::src
+    b1["Заводит карточку<br/>проверяет дубли"]:::core
+  end
+  subgraph s2["Запрос клиента"]
+  end
+  reviewer(["Редактор"]):::who
+  idea["Просто карточка<br/>без цвета"]
+  c1["c1"]
+  x["x"]
+  y["y"]
+  a["a"]
+  b["b"]
+  a1 --> b1
+  b1 --> c1
+  b1 -->|"мало данных"| reviewer
+  x -.-> y
+  x ==> y
+  s1 ~~~ s2
+  a -->|"да"| b
+  classDef src stroke:#4a7fd4,stroke-width:1.6px
+  classDef core stroke:#d4943a,stroke-width:1.6px
+  classDef who stroke:#222,stroke-width:1.6px

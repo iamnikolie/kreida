@@ -1,0 +1,3 @@
+legend:
+  - { kind: src, label: Входы }
+  - { kind: core }

@@ -1,0 +1,22 @@
+title: Как команда обрабатывает запросы     # big header
+sub: Ответ отправляется после проверки          # subtitle
+direction: LR            # LR | TB | RL | BT — default for the board
+legend: { src: Что приходит, core: Что делает ассистент, out: Результат для команды }
+
+groups:                  # optional containers; id: label  or  id: {label, direction, parent, kind}
+  s1: { label: Новая запись, direction: LR }
+  s2: Запрос клиента
+
+nodes:                   # map id -> "Title | secondary text"  or  {title, text, kind, group, icon, shape, width}
+  a1: { title: Анкета в Telegram, text: "тема, описание", kind: src, group: s1, icon: send }
+  b1: { title: "Заводит карточку | проверяет дубли", kind: core, group: s1 }
+  reviewer: { title: Редактор, kind: who }
+  idea: Просто карточка | без цвета
+
+edges:                   # strings; chains allowed; ": label" at the end labels the last hop
+  - a1 -> b1 -> c1
+  - b1 -> reviewer: мало данных
+  - x -.-> y             # dashed
+  - x => y               # thick
+  - s1 ~~~ s2            # invisible: layout order only
+  - { from: a, to: b, label: да, animated: true }

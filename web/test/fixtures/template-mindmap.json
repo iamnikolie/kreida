@@ -1,0 +1,179 @@
+{
+  "title": "Title: with colon",
+  "sub": "",
+  "direction": "LR",
+  "layout": "radial",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "root",
+      "title": "Title: with colon",
+      "text": "",
+      "kind": "who",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a",
+      "title": "Первая ветка",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a1",
+      "title": "Идея",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a2",
+      "title": "Идея",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b",
+      "title": "Вторая ветка",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b1",
+      "title": "Идея",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c",
+      "title": "Третья ветка",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c1",
+      "title": "Идея",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c2",
+      "title": "Идея",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-root-a",
+      "from": "root",
+      "to": "a",
+      "label": ""
+    },
+    {
+      "id": "e1-root-b",
+      "from": "root",
+      "to": "b",
+      "label": ""
+    },
+    {
+      "id": "e2-root-c",
+      "from": "root",
+      "to": "c",
+      "label": ""
+    },
+    {
+      "id": "e3-a-a1",
+      "from": "a",
+      "to": "a1",
+      "label": ""
+    },
+    {
+      "id": "e4-a-a2",
+      "from": "a",
+      "to": "a2",
+      "label": ""
+    },
+    {
+      "id": "e5-b-b1",
+      "from": "b",
+      "to": "b1",
+      "label": ""
+    },
+    {
+      "id": "e6-c-c1",
+      "from": "c",
+      "to": "c1",
+      "label": ""
+    },
+    {
+      "id": "e7-c-c2",
+      "from": "c",
+      "to": "c2",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

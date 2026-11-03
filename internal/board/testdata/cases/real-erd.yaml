@@ -1,0 +1,8 @@
+direction: LR
+nodes:
+  cities: { title: cities, kind: core, fields: [id, name, country] }
+  models:
+    title: models
+    kind: src
+    fields: [id, name, "status | signed / not signed", "city_id -> cities", "agency_id -.-> agencies"]
+  agencies: { title: agencies, kind: src, fields: [id, name, "terms | example terms"] }

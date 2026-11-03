@@ -1,0 +1,3 @@
+/* sketch style: outline drawn by rough.js over a box; stroke colour is the box's --kc */
+.rough { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+.rough path { fill: none; stroke: var(--kc); stroke-width: 1.5; }

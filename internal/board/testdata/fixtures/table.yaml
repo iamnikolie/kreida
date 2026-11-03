@@ -1,0 +1,9 @@
+nodes:
+  opts:
+    title: Варианты
+    cols: [Вариант, Цена, Скорость]
+    rows:
+      - [n8n, { text: "$20", score: 2 }, быстро]
+      - [Zapier, { text: "$70", score: -1 }, быстро]
+  next: Решение
+edges: [opts -> next]

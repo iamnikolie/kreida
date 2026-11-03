@@ -1,0 +1,8 @@
+groups:
+  g: { label: G, nodes: [a, b, 3] }
+  h: { label: H, nodes: not-a-list }
+nodes:
+  a: A
+  b: B
+  c: { title: C, group: h }
+  "3": Three

@@ -1,0 +1,11 @@
+groups: { now: Сейчас, assist: С ассистентом }
+nodes:
+  in: { title: Запрос клиента, kind: who }
+  n1: { title: Читает вручную, kind: warn, group: now }
+  a1: { title: Ассистент разбирает, kind: core, group: assist, icon: bot }
+edges:
+  - in -> n1
+  - in -> a1
+steps:
+  - { title: Сейчас — всё руками, show: [now] }
+  - { title: С ассистентом, show: [assist], hide: [now] }

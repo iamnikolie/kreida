@@ -1,0 +1,22 @@
+flowchart TD
+  subgraph one["First"]
+    direction LR
+    subgraph inner["Inner group"]
+      c["c"]
+    end
+    a["a"]
+    b["b"]
+  end
+  subgraph two["Second one"]
+    d["d"]
+  end
+  subgraph Some_title_with_spaces["Some title with spaces"]
+    e["e"]
+  end
+  subgraph three["three"]
+    f["f"]
+  end
+  a --> b
+  one --> two
+  a --> d
+  b ~~~ e

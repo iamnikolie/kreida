@@ -1,0 +1,6 @@
+groups: { now: Сейчас, later: С ассистентом }
+nodes: { a: { group: now }, b: { group: later }, c: C }
+steps:
+  - { title: Сейчас, show: [now] }
+  - { title: С ассистентом, show: later, hide: [now] }
+  - c

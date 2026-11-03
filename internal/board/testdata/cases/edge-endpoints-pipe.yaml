@@ -1,0 +1,2 @@
+edges:
+  - "Cache | redis -> App | server"

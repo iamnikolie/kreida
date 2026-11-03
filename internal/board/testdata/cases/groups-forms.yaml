@@ -1,0 +1,7 @@
+groups:
+  s1: { label: Новая запись, direction: LR }
+  s2: Запрос клиента
+  s3: { title: Через title, kind: p2, parent: s1, direction: TB }
+  s4: { label: Wrong dir, direction: DOWN }
+  s5: ~
+  s6: 7

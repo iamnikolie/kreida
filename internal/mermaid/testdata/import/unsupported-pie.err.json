@@ -1,0 +1,3 @@
+{
+  "message": "mermaid: only flowchart/graph and sequenceDiagram are supported (got \"pie\")"
+}

@@ -1,0 +1,34 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "other",
+      "label": "G",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "a",
+      "text": "",
+      "kind": "plain",
+      "group": "other",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [],
+  "steps": []
+}

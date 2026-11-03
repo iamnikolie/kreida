@@ -1,0 +1,4 @@
+.err { color: var(--err); background: var(--panel); padding: 8px 14px; border-radius: 10px; font: 12px "IBM Plex Mono", monospace;
+  white-space: pre-wrap; max-width: 80vw; box-shadow: var(--shadow); }
+.empty { margin-top: 40vh; color: var(--muted); font-size: 15px; }
+.empty code { font: 13px "IBM Plex Mono", monospace; background: var(--panel); padding: 2px 6px; border-radius: 6px; }

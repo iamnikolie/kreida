@@ -1,0 +1,23 @@
+.legend { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: 46vw; }
+/* on a phone the legend sits in the bar's sheet, not in the corner */
+.phone .legend { max-width: none; justify-content: flex-start; }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px 5px 9px; border-radius: 999px; background: var(--panel);
+  font-size: 12.5px; color: var(--pill-fg); box-shadow: 0 1px 2px rgba(0,0,0,.06); backdrop-filter: blur(8px); }
+.chip i { width: 10px; height: 10px; border-radius: 3px; border: 1.5px solid var(--plain); background: var(--plain-bg); }
+.chip.k-src i { border-color: var(--src); background: var(--src-bg); }
+.chip.k-core i { border-color: var(--core); background: var(--core-bg); }
+.chip.k-out i { border-color: var(--out); background: var(--out-bg); }
+.chip.k-warn i { border-color: var(--warn); background: var(--warn-bg); }
+.chip.k-info i { border-color: var(--info); background: var(--info-bg); }
+.chip.k-p2 i { border-style: dashed; border-color: var(--p2); background: transparent; }
+.chip.k-who i { border-color: var(--who); background: var(--who-bg); border-radius: 999px; }
+.chip.k-note i { border: none; background: var(--note-bg); }
+
+.sketch .chip { font-family: 'Caveat', cursive; }
+
+/* A client's desktop (D-2026-10-29-03, row k): Plex 13/18 in every style, 28 px high, an 8 px swatch. The phone keeps its chips in the sheet. */
+.share:not(.phone) .chip { box-sizing: border-box; height: 28px; gap: 8px; padding: 0 12px 0 10px; font: 400 13px/18px "IBM Plex Sans", -apple-system, system-ui, sans-serif; }
+.share:not(.phone) .chip i { box-sizing: border-box; width: 8px; height: 8px; border-radius: 2px; }
+.share:not(.phone) .chip.k-who i { border-radius: 999px; }
+/* a narrow desktop frame that is presenting (the embed on a page): no room for the chips next to the head */
+@media (max-width: 799px) { .share.presenting:not(.phone) .legend { display: none; } }

@@ -1,0 +1,31 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "a",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": {
+        "source": "cmd:x",
+        "every": 3600,
+        "path": null,
+        "label": ""
+      }
+    }
+  ],
+  "edges": [],
+  "steps": []
+}

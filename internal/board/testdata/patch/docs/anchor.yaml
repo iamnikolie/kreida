@@ -1,0 +1,3 @@
+nodes:
+  a: &x { title: A }
+  b: *x

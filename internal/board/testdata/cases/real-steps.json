@@ -1,0 +1,97 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "now",
+      "label": "Сейчас",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    },
+    {
+      "id": "assist",
+      "label": "С ассистентом",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "in",
+      "title": "Запрос клиента",
+      "text": "",
+      "kind": "who",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "n1",
+      "title": "Читает вручную",
+      "text": "",
+      "kind": "warn",
+      "group": "now",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a1",
+      "title": "Ассистент разбирает",
+      "text": "",
+      "kind": "core",
+      "group": "assist",
+      "icon": "bot",
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-in-n1",
+      "from": "in",
+      "to": "n1",
+      "label": ""
+    },
+    {
+      "id": "e1-in-a1",
+      "from": "in",
+      "to": "a1",
+      "label": ""
+    }
+  ],
+  "steps": [
+    {
+      "title": "Сейчас — всё руками",
+      "show": [
+        "now"
+      ],
+      "hide": []
+    },
+    {
+      "title": "С ассистентом",
+      "show": [
+        "assist"
+      ],
+      "hide": [
+        "now"
+      ]
+    }
+  ]
+}

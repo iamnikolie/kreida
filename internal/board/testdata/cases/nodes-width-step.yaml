@@ -1,0 +1,16 @@
+nodes:
+  a: { width: "100" }
+  b: { width: abc }
+  c: { width: 0 }
+  d: { width: -5 }
+  e: { step: 0 }
+  f: { step: "2" }
+  g: { step: abc }
+  h: { step: "" }
+  i: { step: ~ }
+  j: { step: true }
+  k: { step: 1.5 }
+  l: { width: 0x10 }
+  m: { width: " 12 " }
+  n: { width: 1e3 }
+  o: { step: -0 }

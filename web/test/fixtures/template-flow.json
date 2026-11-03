@@ -1,0 +1,78 @@
+{
+  "title": "Title: with colon",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [
+    {
+      "kind": "src",
+      "label": "Входы"
+    },
+    {
+      "kind": "core",
+      "label": "Обработка"
+    },
+    {
+      "kind": "out",
+      "label": "Результат"
+    }
+  ],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "Начало",
+      "text": "откуда приходит",
+      "kind": "src",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b",
+      "title": "Обработка",
+      "text": "",
+      "kind": "core",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c",
+      "title": "Результат",
+      "text": "",
+      "kind": "out",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-a-b",
+      "from": "a",
+      "to": "b",
+      "label": ""
+    },
+    {
+      "id": "e1-b-c",
+      "from": "b",
+      "to": "c",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

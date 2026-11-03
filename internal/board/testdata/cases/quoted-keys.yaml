@@ -1,0 +1,4 @@
+nodes:
+  "a b": A
+  'c-d': C
+  "e:f": E

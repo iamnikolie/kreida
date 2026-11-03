@@ -1,0 +1,9 @@
+flowchart LR
+  subgraph K["Редактор"]
+    m2["Ответ<br/>→ C"]:::p2
+  end
+  subgraph C["C"]
+    m1["Запрос<br/>→ Редактор"]
+  end
+  m1 --> m2
+  classDef p2 stroke:#9b968c,stroke-width:1.6px,stroke-dasharray:5 4

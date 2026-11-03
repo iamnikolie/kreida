@@ -1,0 +1,15 @@
+flowchart TD
+  subgraph S1["Alpha"]
+    direction LR
+    a1["One<br/>x, y"]:::src
+    a2["Two"]:::core
+  end
+  subgraph S2["Beta"]
+    b1["Three"]:::out
+  end
+  a1 --> a2
+  S1 ~~~ S2
+  a2 -->|"go"| b1
+  classDef src stroke:#4a7fd4,stroke-width:1.6px
+  classDef core stroke:#d4943a,stroke-width:1.6px
+  classDef out stroke:#4f9a62,stroke-width:1.6px

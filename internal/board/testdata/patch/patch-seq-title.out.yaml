@@ -1,0 +1,12 @@
+# seq form
+nodes:
+  - id: a
+    title: Alpha 2 # keep
+    text: one
+
+  - { id: b, title: Bee, text: two }
+  - { id: c }
+  - id: d
+    kind: core
+edges:
+  - a -> b

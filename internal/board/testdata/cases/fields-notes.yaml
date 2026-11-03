@@ -1,0 +1,12 @@
+nodes:
+  t:
+    title: users
+    fields:
+      - id
+      - name | the name
+      - status | клиент / лид
+      - email: unique
+      - "plan_id -> plans"
+      - "plan2_id -> plans | with note"
+      - "opt_id -.-> others | optional"
+      - "  spaced  |  note  "

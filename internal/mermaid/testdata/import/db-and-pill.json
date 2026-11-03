@@ -1,0 +1,78 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "a",
+      "title": "Store",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": "database",
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "b",
+      "title": "Pill",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": "pill",
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "c",
+      "title": "Circle",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": "pill",
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "d",
+      "title": "Dbl",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": "pill",
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-a-b",
+      "from": "a",
+      "to": "b",
+      "label": ""
+    },
+    {
+      "id": "e1-b-c",
+      "from": "b",
+      "to": "c",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

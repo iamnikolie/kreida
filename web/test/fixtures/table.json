@@ -1,0 +1,77 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "opts",
+      "title": "Варианты",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null,
+      "cols": [
+        "Вариант",
+        "Цена",
+        "Скорость"
+      ],
+      "rows": [
+        [
+          {
+            "text": "n8n"
+          },
+          {
+            "text": "$20",
+            "score": 2
+          },
+          {
+            "text": "быстро"
+          }
+        ],
+        [
+          {
+            "text": "Zapier"
+          },
+          {
+            "text": "$70",
+            "score": -1
+          },
+          {
+            "text": "быстро"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "next",
+      "title": "Решение",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-opts-next",
+      "from": "opts",
+      "to": "next",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

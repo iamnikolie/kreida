@@ -1,0 +1,7 @@
+nodes:
+  a: { fields: [id, name] }
+  b: { fields: [id, "a_id -> a"] }
+  c: { fields: [name, "a_id -> a", "b_id -> b"] }
+  d: { fields: ["x -> missing"] }
+edges:
+  - { from: a, to: d }

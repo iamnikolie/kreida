@@ -1,0 +1,16 @@
+title: Что делать первым
+sub: эффект × усилия, быстрые победы подсвечены
+layout: matrix
+x: { label: Усилия, low: мало, high: много }
+y: { label: Эффект, low: слабый, high: сильный }
+hot: low-high
+quadrants: { low-high: Быстрые победы, high-high: Большие ставки, low-low: Мелочи, high-low: Не сейчас }
+terms:
+  CRM: база клиентов и сделок
+nodes:
+  a: { title: Шаблоны ответов, text: 10 частых вопросов, x: low, y: high, kind: out }
+  b: { title: Напоминания клиентам, x: low, y: high, kind: out }
+  c: { title: Своя CRM, x: high, y: high, kind: core }
+  d: { title: Новый логотип, x: low, y: low }
+  e: { title: Переезд на другой сервер, x: high, y: low, kind: p2 }
+  f: { title: Голосовые ответы, text: обсудить после запуска, kind: note }

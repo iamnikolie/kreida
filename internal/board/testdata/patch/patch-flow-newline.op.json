@@ -1,0 +1,6 @@
+{
+  "doc": "doc1",
+  "op": "patchNode",
+  "id": "a",
+  "text": "line one\nline two"
+}

@@ -1,0 +1,4 @@
+{
+  "yaml": true,
+  "message": "yaml: more than one document (---); a board is one document"
+}

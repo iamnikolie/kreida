@@ -1,0 +1,55 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "g",
+      "label": "G",
+      "kind": null,
+      "direction": null,
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "t",
+      "title": "t",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": [
+        {
+          "name": "id",
+          "ref": null,
+          "dashed": false,
+          "note": ""
+        },
+        {
+          "name": "g_id",
+          "ref": "g",
+          "dashed": false,
+          "note": ""
+        }
+      ],
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-g-t-g_id",
+      "from": "g",
+      "to": "t",
+      "label": "",
+      "toPort": "g_id"
+    }
+  ],
+  "steps": []
+}

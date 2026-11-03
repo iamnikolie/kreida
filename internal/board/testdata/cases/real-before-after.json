@@ -1,0 +1,82 @@
+{
+  "title": "",
+  "sub": "",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [],
+  "groups": [
+    {
+      "id": "now",
+      "label": "Сейчас",
+      "kind": null,
+      "direction": "TB",
+      "parent": null
+    },
+    {
+      "id": "next",
+      "label": "С ассистентом",
+      "kind": null,
+      "direction": "TB",
+      "parent": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "in",
+      "title": "Запрос",
+      "text": "",
+      "kind": "who",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "w",
+      "title": "Руками",
+      "text": "",
+      "kind": "warn",
+      "group": "now",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "a",
+      "title": "Ассистент",
+      "text": "",
+      "kind": "core",
+      "group": "next",
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-in-w",
+      "from": "in",
+      "to": "w",
+      "label": "",
+      "thick": true
+    },
+    {
+      "id": "e1-in-a",
+      "from": "in",
+      "to": "a",
+      "label": "",
+      "thick": true
+    }
+  ],
+  "steps": []
+}

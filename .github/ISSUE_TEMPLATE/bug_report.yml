@@ -1,0 +1,24 @@
+name: Bug report
+description: Report a problem with kreida
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Include the command, expected behavior, and actual behavior.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version and operating system
+      description: Include the output of kreida version.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Minimal board YAML
+      description: Remove private data before posting.
+      render: yaml

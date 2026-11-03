@@ -1,0 +1,5 @@
+groups: { g: G }
+nodes: { a: { group: g }, x: X }
+edges:
+  - x -> g
+  - g -> x

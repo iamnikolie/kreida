@@ -1,0 +1,5 @@
+nodes:
+  - { id: a, title: First }
+  - { id: a, title: Second, group: g }
+groups: { g: G }
+edges: [ a -> b ]

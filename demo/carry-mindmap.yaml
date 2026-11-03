@@ -1,0 +1,25 @@
+title: Идеи на квартал
+layout: radial
+nodes:
+  root: { title: Учебный проект, kind: who }
+  sales: Аудитория
+  s1: Опрос
+  s2: Партнёры
+  s3: Повторные клиенты
+  product: Продукт
+  p1: Telegram-бот
+  p2: Кабинет клиента
+  team: Команда
+  t1: Распределение задач
+  t2: Обучение
+  money: Деньги
+  m1: Оценка расходов
+edges:
+  - root -> sales -> s1
+  - sales -> s2
+  - sales -> s3
+  - root -> product -> p1
+  - product -> p2
+  - root -> team -> t1
+  - team -> t2
+  - root -> money -> m1

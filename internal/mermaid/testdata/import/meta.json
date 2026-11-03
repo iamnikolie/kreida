@@ -1,0 +1,59 @@
+{
+  "title": "My title",
+  "sub": "My subtitle",
+  "direction": "LR",
+  "layout": "auto",
+  "style": "clean",
+  "legend": [
+    {
+      "kind": "src",
+      "label": "Входы"
+    },
+    {
+      "kind": "core",
+      "label": "Обработка"
+    },
+    {
+      "kind": "out",
+      "label": ""
+    }
+  ],
+  "groups": [],
+  "nodes": [
+    {
+      "id": "A",
+      "title": "A",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    },
+    {
+      "id": "B",
+      "title": "B",
+      "text": "",
+      "kind": "plain",
+      "group": null,
+      "icon": null,
+      "shape": null,
+      "width": null,
+      "step": null,
+      "fields": null,
+      "live": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0-A-B",
+      "from": "A",
+      "to": "B",
+      "label": ""
+    }
+  ],
+  "steps": []
+}

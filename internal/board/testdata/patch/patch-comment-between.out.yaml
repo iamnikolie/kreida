@@ -1,0 +1,7 @@
+nodes:
+  a:
+    title: A2 # t
+    # about text
+    text: B2 # x
+    # about kind
+    kind: src
