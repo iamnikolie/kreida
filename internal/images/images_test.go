@@ -8,6 +8,7 @@ import (
 	"image/gif"
 	"image/jpeg"
 	"image/png"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
@@ -205,14 +206,27 @@ func TestSizeLimits(t *testing.T) {
 	assert.Contains(t, err.Error(), "over the 40 MP limit")
 }
 
+// noise is a PNG that does not compress: its size is its pixels.
+func noise(t *testing.T, w, h int, seed int64) []byte {
+	t.Helper()
+
+	img := image.NewNRGBA(image.Rect(0, 0, w, h))
+	_, _ = rand.New(rand.NewSource(seed)).Read(img.Pix)
+
+	var b bytes.Buffer
+	require.NoError(t, (&png.Encoder{CompressionLevel: png.NoCompression}).Encode(&b, img))
+
+	return b.Bytes()
+}
+
 func TestABoardHasACapOfItsOwnAndAFileCountsOnce(t *testing.T) {
 	dir := t.TempDir()
 
 	yaml := "nodes:\n"
 
-	for _, id := range []string{"a", "b", "c", "d", "e", "f"} {
-		data := append(pngBytes(t, 2, 2), make([]byte, images.MaxFile-200)...)
-		data[len(data)-1] = id[0]
+	for i, id := range []string{"a", "b", "c", "d", "e", "f"} {
+		data := noise(t, 1100, 1100, int64(i))
+		require.Less(t, len(data), images.MaxFile)
 		write(t, filepath.Join(dir, id+".png"), data)
 		yaml += "  " + id + ": {title: " + id + ", image: " + id + ".png}\n"
 	}
@@ -222,7 +236,7 @@ func TestABoardHasACapOfItsOwnAndAFileCountsOnce(t *testing.T) {
 	b := parse(t, yaml)
 	set := images.Attach(b, dir)
 
-	assert.Len(t, set.Files, 5, "five files of 5 MiB fill 25 MiB")
+	assert.Len(t, set.Files, 5, "five files of 4.8 MB fit in 25 MiB, a sixth does not")
 	assert.Equal(t, images.TooBig, reason(t, b, "f"))
 	assert.Equal(t, "", reason(t, b, "again"), "the same bytes twice cost nothing more")
 	assert.Equal(t, b.Nodes[0].Image.SHA256, b.Nodes[6].Image.SHA256)

@@ -1,7 +1,8 @@
 // Package images turns the `image:` paths of a board into checked bytes. A board's YAML can name any path on the
 // machine, and what is read here can end up in an HTML export or on a published board, so this is the one place that
 // reads such a file: only a regular file, only a known image format judged by its content, only up to a size. The
-// path stays on this machine: what goes out is the hash, the type, the pixel size and the bytes.
+// path stays on this machine: what goes out is the hash, the type, the pixel size and the bytes, and those bytes are
+// stripped of their metadata first (see Clean).
 package images
 
 import (
@@ -162,7 +163,7 @@ func sniff(data []byte) (typ string, w, h int, err error) {
 	r := bytes.NewReader(data)
 
 	switch {
-	case bytes.HasPrefix(data, []byte("\x89PNG\r\n\x1a\n")):
+	case bytes.HasPrefix(data, []byte(pngSignature)):
 		typ = "image/png"
 		cfg, err = png.DecodeConfig(r)
 	case bytes.HasPrefix(data, []byte("\xff\xd8\xff")):
@@ -257,11 +258,66 @@ func (s Set) DataURLs() map[string]string {
 
 // Attach reads the images a board names, with relative paths against dir, and fills in every such card's Image: the
 // picture, or the reason there is none. A broken image never fails the board: it may be there tomorrow, or on the
-// machine the board moves to. Attach is for the owner's own page; what a client gets goes through Public.
-func Attach(b *board.Board, dir string) Set {
+// machine the board moves to. Attach is for the owner's own page, which shows the file as it is; what a client gets
+// goes through Public. An image that Clean refuses is refused here too, so the owner sees it before a client misses it.
+func Attach(b *board.Board, dir string) Set { return collect(b, dir, false) }
+
+// Public is Attach for what leaves the owner's own page: an export, a share link, a published board. Its images are
+// the cleaned ones (see Clean), so their hashes are those of the stripped bytes. A card with a broken image simply has
+// no picture: the reader gets a clean card, and the owner hears of it from Problems.
+func Public(b *board.Board, dir string) Set {
+	set := collect(b, dir, true)
+
+	for i := range b.Nodes {
+		if img := b.Nodes[i].Image; img != nil && img.Error != "" {
+			b.Nodes[i].Image = nil
+		}
+	}
+
+	return set
+}
+
+// loaded is what one path came to: the picture a card shows, the size it counts against the board, or why not.
+type loaded struct {
+	show File
+	size int
+	err  error
+}
+
+func collect(b *board.Board, dir string, public bool) Set {
 	set := Set{Files: map[string]File{}}
-	seen := map[string]File{}
+	byPath := map[string]loaded{}
 	total := 0
+
+	load := func(path string) loaded {
+		if l, ok := byPath[path]; ok {
+			return l
+		}
+
+		var l loaded
+
+		f, err := Load(path)
+		if err == nil {
+			var c File
+
+			if c, err = Clean(f); err != nil {
+				err = refuse(reasonOf(err), "%s: %s", path, err)
+			} else {
+				// the browser turns the file by its EXIF, so the owner's card is sized like the upright picture
+				l.show, l.size = f, len(c.Bytes)
+				l.show.W, l.show.H = c.W, c.H
+
+				if public {
+					l.show = c
+				}
+			}
+		}
+
+		l.err = err
+		byPath[path] = l
+
+		return l
+	}
 
 	for i := range b.Nodes {
 		n := &b.Nodes[i]
@@ -271,23 +327,16 @@ func Attach(b *board.Board, dir string) Set {
 
 		path := Resolve(dir, n.ImagePath)
 
-		f, ok := seen[path]
-		if !ok {
-			var err error
+		l := load(path)
+		if l.err != nil {
+			set.Problems = append(set.Problems, Problem{Node: n.ID, Err: l.err})
+			n.Image = &board.Image{Error: reasonOf(l.err)}
 
-			f, err = Load(path)
-			if err != nil {
-				set.Problems = append(set.Problems, Problem{Node: n.ID, Err: err})
-				n.Image = &board.Image{Error: reasonOf(err)}
-
-				continue
-			}
-
-			seen[path] = f
+			continue
 		}
 
-		if _, have := set.Files[f.SHA256]; !have {
-			if total+len(f.Bytes) > MaxBoard {
+		if _, have := set.Files[l.show.SHA256]; !have {
+			if total+l.size > MaxBoard {
 				err := refuse(TooBig, "%s: the board is over its %d MiB of images", path, MaxBoard>>20)
 				set.Problems = append(set.Problems, Problem{Node: n.ID, Err: err})
 				n.Image = &board.Image{Error: TooBig}
@@ -295,26 +344,12 @@ func Attach(b *board.Board, dir string) Set {
 				continue
 			}
 
-			total += len(f.Bytes)
-			set.Files[f.SHA256] = f
+			total += l.size
+			set.Files[l.show.SHA256] = l.show
 		}
 
-		img := f.Image
+		img := l.show.Image
 		n.Image = &img
-	}
-
-	return set
-}
-
-// Public is Attach for what leaves the owner's own page: an export, a share link, a published board. A card with a
-// broken image simply has no picture: the reader gets a clean card, and the owner hears of it from Problems.
-func Public(b *board.Board, dir string) Set {
-	set := Attach(b, dir)
-
-	for i := range b.Nodes {
-		if img := b.Nodes[i].Image; img != nil && img.Error != "" {
-			b.Nodes[i].Image = nil
-		}
 	}
 
 	return set

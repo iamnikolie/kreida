@@ -2,6 +2,8 @@ package server_test
 
 import (
 	"bytes"
+	"encoding/binary"
+	"hash/crc32"
 	"image"
 	"image/png"
 	"net/http"
@@ -140,4 +142,34 @@ func TestAChangedImageFileReachesThePageAndOnlyAPublishedBoardReachesTheCloud(t 
 	})
 	assert.NotContains(t, strings.Join(f.uploads("pub"), ""), pic)
 	assert.Empty(t, f.uploads("private"))
+}
+
+func TestAShareLinkServesTheStrippedBytesTheEditorTheFile(t *testing.T) {
+	h := start(t)
+
+	var plain bytes.Buffer
+	require.NoError(t, png.Encode(&plain, image.NewRGBA(image.Rect(0, 0, 4, 2))))
+
+	d := plain.Bytes()
+	at := bytes.Index(d, []byte("IDAT")) - 4
+	text := append([]byte("tEXt"), "Comment\x00share-secret"...)
+	chunk := binary.BigEndian.AppendUint32(nil, uint32(len(text)-4))
+	chunk = append(chunk, text...)
+	chunk = binary.BigEndian.AppendUint32(chunk, crc32.ChecksumIEEE(text))
+	raw := append(append(append([]byte{}, d[:at]...), chunk...), d[at:]...)
+
+	require.NoError(t, os.WriteFile(filepath.Join(h.paths.Dir, "a.png"), raw, 0o644))
+	h.put("x", "nodes:\n  a: { title: A, image: a.png }\n")
+
+	own := h.do("GET", "/api/boards/x/images/"+shaOf(t, h.do("GET", "/api/boards/x", "")), "")
+	assert.Equal(t, string(raw), own.body, "the owner's page shows the file as it is")
+
+	link, err := h.shares.Share("x")
+	require.NoError(t, err)
+
+	sha := shaOf(t, h.do("GET", "/api/share/"+link, ""))
+	shared := h.do("GET", "/api/share/"+link+"/images/"+sha, "")
+	require.Equal(t, 200, shared.status)
+	assert.NotContains(t, shared.body, "share-secret")
+	assert.Equal(t, string(d), shared.body, "only the text chunk went")
 }

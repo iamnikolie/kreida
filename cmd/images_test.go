@@ -3,6 +3,8 @@ package cmd_test
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/binary"
+	"hash/crc32"
 	"image"
 	"image/png"
 	"os"
@@ -62,4 +64,30 @@ func TestExportEmbedsTheBytesAndNoPathOrTraceOfABrokenImage(t *testing.T) {
 	assert.NotContains(t, string(html), "gone-name")
 	assert.NotContains(t, string(html), `"error":"missing"`)
 	assert.NotContains(t, string(html), e.dir)
+}
+
+func TestExportStripsWhatThePictureCarries(t *testing.T) {
+	e := newEnv(t)
+	require.NoError(t, os.MkdirAll(e.dir, 0o755))
+
+	data := picture(t)
+	at := bytes.Index(data, []byte("IDAT")) - 4
+	text := append([]byte("tEXt"), "Comment\x00export-secret"...)
+	chunk := binary.BigEndian.AppendUint32(nil, uint32(len(text)-4))
+	chunk = append(chunk, text...)
+	chunk = binary.BigEndian.AppendUint32(chunk, crc32.ChecksumIEEE(text))
+	raw := append(append(append([]byte{}, data[:at]...), chunk...), data[at:]...)
+	require.NoError(t, os.WriteFile(filepath.Join(e.dir, "a.png"), raw, 0o644))
+
+	_, _, err := e.run("nodes:\n  a: { title: A, image: a.png }\n", "set", "x")
+	require.NoError(t, err)
+
+	file := filepath.Join(t.TempDir(), "x.html")
+	_, _, err = e.run("", "export", "x", "-o", file)
+	require.NoError(t, err)
+
+	html, err := os.ReadFile(file)
+	require.NoError(t, err)
+	assert.Contains(t, string(html), base64.StdEncoding.EncodeToString(data))
+	assert.NotContains(t, string(html), base64.StdEncoding.EncodeToString(raw))
 }

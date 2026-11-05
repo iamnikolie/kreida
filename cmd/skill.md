@@ -247,9 +247,13 @@ A missing or refused file never fails a board. `kreida set`, `png`, `export` and
 stderr and exit 0. Your own editor and `kreida png` draw a slot saying why; an export, a share link and a published board
 show the card without a picture and without the reason. Read stderr before you send a client an export.
 
-What leaves the machine: the path never does, in any JSON or file, only the bytes, as they are (a photo's EXIF stays in
-them). An export or a publish carries the bytes of any image the board names, so check where a board's paths point before
-you send it. On a published board only that board's images go up. A changed image file reaches the open page and, for a
+What leaves the machine: the path never does, in any JSON or file, only the bytes, and those stripped of metadata first.
+An export, a share link and a publish drop EXIF (GPS, camera, dates), XMP, IPTC, comments, PNG text chunks and anything
+after the picture, in all four formats; a colour profile stays. A photo that EXIF turns is turned in its pixels first
+(a turned JPEG is saved again at quality 92), so it stands as on your screen. A file that cannot be stripped is refused,
+never sent as is, and so is a WebP that EXIF turns (save it upright). Your own editor and `kreida png` show the file as
+it is. An export or a publish still carries the picture of any image the board names, so check where a board's paths
+point before you send it. On a published board only that board's images go up. A changed image file reaches the open page and, for a
 published board, the cloud within seconds, by the same route as a changed board.
 
 Inside `{ … }` quote any value that has a comma, colon or `|`: `text: "тема, описание"`.

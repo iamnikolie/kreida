@@ -34,7 +34,7 @@ func (s *Server) shared(w http.ResponseWriter, r *http.Request, parts []string) 
 
 		writeJSON(w, http.StatusOK, vs.WithoutSource())
 	case sub == "images" && (r.Method == http.MethodGet || r.Method == http.MethodHead):
-		s.image(w, r, name, at(parts, 4))
+		s.image(w, r, name, at(parts, 4), images.Public)
 	case sub != "" || r.Method != http.MethodGet:
 		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "read-only"})
 	default:

@@ -91,8 +91,8 @@ func (s *Server) boardResponse(name string, attach func(*board.Board, string) im
 // is now gets an answer, so a share link never reaches another image on this machine. The type is the one the content
 // was found to be, the page may not be read as anything else, and the browser asks again every time, so a revoked link
 // stops at the next load.
-func (s *Server) image(w http.ResponseWriter, r *http.Request, name, sha string) {
-	f, ok := s.imageOf(name, sha)
+func (s *Server) image(w http.ResponseWriter, r *http.Request, name, sha string, attach func(*board.Board, string) images.Set) {
+	f, ok := s.imageOf(name, sha, attach)
 	if !ok {
 		writeJSON(w, http.StatusNotFound, map[string]string{"error": "no such image"})
 
@@ -108,8 +108,9 @@ func (s *Server) image(w http.ResponseWriter, r *http.Request, name, sha string)
 	http.ServeContent(w, r, "", time.Time{}, bytes.NewReader(f.Bytes))
 }
 
-// imageOf finds an image by its hash among those the board names now.
-func (s *Server) imageOf(name, sha string) (images.File, bool) {
+// imageOf finds an image by its hash among those the board names now: the files as they are for the editor
+// (images.Attach), the stripped ones for a share link (images.Public).
+func (s *Server) imageOf(name, sha string, attach func(*board.Board, string) images.Set) (images.File, bool) {
 	if !images.ValidSHA(sha) {
 		return images.File{}, false
 	}
@@ -124,7 +125,7 @@ func (s *Server) imageOf(name, sha string) (images.File, bool) {
 		return images.File{}, false
 	}
 
-	f, ok := images.Attach(b, s.cfg.Paths.Dir).Files[sha]
+	f, ok := attach(b, s.cfg.Paths.Dir).Files[sha]
 
 	return f, ok
 }
@@ -212,7 +213,7 @@ func (s *Server) api(w http.ResponseWriter, r *http.Request, parts []string) {
 	case sub == "" && r.Method == http.MethodGet:
 		writeJSON(w, http.StatusOK, s.boardResponse(name, images.Attach))
 	case sub == "images" && (r.Method == http.MethodGet || r.Method == http.MethodHead):
-		s.image(w, r, name, id)
+		s.image(w, r, name, id, images.Attach)
 	case sub == "style" && r.Method == http.MethodPut:
 		s.putStyle(w, r, name)
 	case sub == "pos" && r.Method == http.MethodPut:

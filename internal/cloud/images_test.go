@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"image"
+	"image/jpeg"
 	imagepng "image/png"
 	"net/http"
 	"os"
@@ -234,4 +235,63 @@ func TestAPushThatBrokeOffGoesOnWhereItStopped(t *testing.T) {
 	s.Changed("x")
 
 	eventually(t, "the second try", func() bool { return c.count("PUT", "/images/"+f.SHA256) == 2 && len(c.puts("x")) == 3 })
+}
+
+// gpsJPEG is a JPEG with GPS in its EXIF and an orientation that turns it.
+func gpsJPEG(t *testing.T) []byte {
+	t.Helper()
+
+	var b bytes.Buffer
+	require.NoError(t, jpeg.Encode(&b, image.NewRGBA(image.Rect(0, 0, 16, 8)), nil))
+
+	tiff := []byte("II*\x00\x08\x00\x00\x00\x02\x00" +
+		"\x12\x01\x03\x00\x01\x00\x00\x00\x06\x00\x00\x00" +
+		"\x25\x88\x04\x00\x01\x00\x00\x00\x26\x00\x00\x00" +
+		"\x00\x00\x00\x00" +
+		"\x01\x00\x01\x00\x02\x00\x02\x00\x00\x00N\x00\x00\x00\x00\x00\x00\x00gps-secret")
+	app1 := append([]byte("Exif\x00\x00"), tiff...)
+
+	d := b.Bytes()
+	out := append([]byte{}, d[:2]...)
+	out = append(out, 0xff, 0xe1, byte((len(app1)+2)>>8), byte(len(app1)+2))
+	out = append(out, app1...)
+
+	return append(out, d[2:]...)
+}
+
+func TestARepeatPublishOfTheSameFileUploadsNothing(t *testing.T) {
+	p := scratch(t)
+	path := filepath.Join(p.Dir, "photo.jpg")
+	require.NoError(t, os.WriteFile(path, gpsJPEG(t), 0o644))
+	require.NoError(t, os.WriteFile(p.BoardFile("x"), []byte("nodes:\n  a: { title: A, image: photo.jpg }\n"), 0o644))
+
+	c := newImageCloud(t)
+	login(t, p, c.fakeCloud)
+
+	first, _ := newSyncer(t, p)
+	_, err := first.Publish(context.Background(), "x")
+	require.NoError(t, err)
+
+	var sent []call
+
+	for _, in := range c.all() {
+		if strings.Contains(in.Path, "/images/") {
+			sent = append(sent, in)
+		}
+	}
+
+	require.Len(t, sent, 1)
+	assert.NotContains(t, sent[0].Body, "gps-secret")
+	assert.NotContains(t, sent[0].Body, "Exif")
+	assert.Contains(t, c.puts("x")[1], `"w":8,"h":16`, "turned upright: the size is the stripped picture's")
+
+	raw, err := images.Load(path)
+	require.NoError(t, err)
+	assert.NotContains(t, sent[0].Path, raw.SHA256, "the hash is the stripped bytes'")
+
+	// another run of kreida, the same file: the hash is the same and nothing goes up again
+	second, _ := newSyncer(t, p)
+	_, err = second.Publish(context.Background(), "x")
+	require.NoError(t, err)
+	assert.Equal(t, 1, c.count("PUT", sent[0].Path[len("/api/cli/boards/x"):]))
 }
