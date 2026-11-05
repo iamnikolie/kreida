@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/iamnikolie/kreida/internal/board"
 	"github.com/iamnikolie/kreida/internal/images"
@@ -65,7 +66,7 @@ func newExportCmd(a *App) *cobra.Command {
 
 			// the bytes go in the file, the paths stay here; the owner hears of a card that lost its picture
 			set := images.Public(b, rt.paths.Dir)
-			warnImages(a, name, set.Problems)
+			warnImages(a, name, slices.Concat(set.Problems, set.Notes))
 
 			html, err := render.HTML(a.Dist, render.Data{Name: name, Board: b, Pos: pos, Images: set.DataURLs()})
 			if err != nil {

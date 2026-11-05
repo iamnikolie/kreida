@@ -64,15 +64,16 @@ carry images re-encoded from their decoded pixels, so no byte of the original
 file goes out: no EXIF (including GPS), XMP, IPTC, comments, PNG text chunks,
 or unused data. JPEG is re-encoded at quality 92. PNG and GIF are re-encoded
 losslessly, and an animated PNG becomes its first frame. WebP becomes PNG when
-it is lossless or has alpha, and JPEG otherwise. Colour profiles are rebuilt
-from their colour data only: RGB matrix profiles and grey profiles, with no
-descriptive text. A photo rotated by its EXIF orientation is rotated in its
-pixels first, so it keeps the same appearance.
+it is lossless or has alpha, and JPEG otherwise. Palettes keep only the colours
+in use. No byte of a colour profile goes out: an sRGB, Display P3, or Adobe RGB
+profile, recognised by its colour data, is replaced with kreida's own copy, and
+any other profile is dropped with a warning that colours may shift. A photo
+rotated by its EXIF orientation is rotated in its pixels first, so it keeps the
+same appearance.
 
-Some files are refused rather than sent unchanged: a file that cannot be read or
-does not decode, an animated WebP, a colour profile that cannot be rebuilt
-(lookup-table or CMYK; save the picture as sRGB), and a CMYK JPEG with a
-profile. Your local editor and `kreida png` show the original file.
+A file that cannot be read or does not decode, and an animated WebP, are
+refused rather than sent unchanged. Your local editor and `kreida png` show the
+original file.
 
 A board can name any image you can read, so check its paths before you send an
 export or share a link.

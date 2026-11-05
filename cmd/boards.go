@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/iamnikolie/kreida/internal/board"
@@ -45,7 +46,8 @@ func warnBoardImages(a *App, rt session, name string) {
 		return
 	}
 
-	warnImages(a, name, images.Attach(b, rt.paths.Dir).Problems)
+	set := images.Attach(b, rt.paths.Dir)
+	warnImages(a, name, slices.Concat(set.Problems, set.Notes))
 }
 
 // boardFile checks a board name and returns the path of its file.

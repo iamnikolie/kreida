@@ -251,11 +251,11 @@ What leaves the machine: the path never does, in any JSON or file, only the byte
 An export, a share link and a publish drop EXIF (GPS, camera, dates), XMP, IPTC, comments, PNG text chunks and anything
 after the picture, in all four formats: every picture is decoded whole and written again from its pixels, so no byte of
 the original file goes out. A JPEG is saved again at quality 92; a PNG and a GIF losslessly (an animated PNG becomes its
-first image, a GIF keeps its frames); a WebP becomes a PNG (lossless or with alpha) or a JPEG (lossy). The colour
-profile is rebuilt from its numbers: an RGB matrix profile or a grey one, described as "ICC", nothing else in it. A
-photo that EXIF turns is turned in its pixels first, its profile with it. Refused, never sent as is: a file that cannot
-be read or whose pixels do not decode, an animated WebP, a profile kreida cannot rebuild (lookup-table or CMYK; save
-the picture as sRGB), a CMYK JPEG with a profile. Your own editor and `kreida png` show the file as
+first image, a GIF keeps its frames, palettes cut to the colours used); a WebP becomes a PNG (lossless or with alpha)
+or a JPEG (lossy). No byte of a colour profile goes out: an sRGB, Display P3 or Adobe RGB profile, recognised by its
+colour, is replaced by kreida's own copy; any other profile is dropped and stderr says the colours may shift (save the
+picture as sRGB to avoid it). A photo that EXIF turns is turned in its pixels first. Refused, never sent as is: a file
+that cannot be read or whose pixels do not decode, and an animated WebP. Your own editor and `kreida png` show the file as
 it is. An export or a publish still carries the picture of any image the board names, so check where a board's paths
 point before you send it. On a published board only that board's images go up. A changed image file reaches the open page and, for a
 published board, the cloud within seconds, by the same route as a changed board.

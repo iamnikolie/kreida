@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"slices"
 
 	"github.com/iamnikolie/kreida/internal/board"
 	"github.com/iamnikolie/kreida/internal/images"
@@ -19,7 +20,7 @@ type Upload struct {
 	Pos   json.RawMessage `json:"pos"`
 	// Images are the checked images this board names: all the image bytes that may leave with it.
 	Images map[string]images.File `json:"-"`
-	// Problems are the cards that go up without their picture, for the owner's terminal or log.
+	// Problems are the cards that go up without their picture or with a picture changed, for the owner's log.
 	Problems []images.Problem `json:"-"`
 }
 
@@ -49,7 +50,7 @@ func Snapshot(p paths.Paths, name string) (Upload, error) {
 
 	set := images.Public(b, p.Dir)
 
-	return Upload{Board: b, Pos: board.ReadPos(p.PosFile(name)), Images: set.Files, Problems: set.Problems}, nil
+	return Upload{Board: b, Pos: board.ReadPos(p.PosFile(name)), Images: set.Files, Problems: slices.Concat(set.Problems, set.Notes)}, nil
 }
 
 // JSON is the upload as sent, encoded like the local API encodes a board.

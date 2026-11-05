@@ -1,236 +1,303 @@
 package images
 
 import (
-	"bytes"
 	"encoding/binary"
-	"errors"
+	"math"
 	"slices"
 )
 
-// errProfile is a colour profile that cannot go out clean: unreadable, or not one kreida can rebuild.
-var errProfile = errors.New("its colour profile is not one kreida can carry; save the picture as sRGB")
+// No byte of a picture's own colour profile leaves the machine. A profile is read for its colour only: if its
+// primaries and tone curves are those of a known standard (sRGB, Display P3, Adobe RGB), the picture goes out with
+// kreida's own copy of that standard; any other profile, a grey or CMYK one, or one that cannot be read, is dropped,
+// and the picture goes out as its pixels decode, which may shift its colours. Dropping carries nothing out; refusing
+// would only cost the owner the picture.
 
 const (
 	iccHeader  = 128
 	iccMaxTags = 100
 	iccMaxCurv = 4096
+
+	// primaryTolerance and curveTolerance are how far a profile may stand from a standard and still be it: the
+	// rounding of the standards' own published profiles, with room.
+	primaryTolerance = 0.003
+	curveTolerance   = 0.006
 )
 
-// iccOrder is every tag a profile that leaves the machine may have after desc and cprt, in the order it is written,
-// with the types it may have. A matrix/TRC profile is all a display needs; lookup tables, names, text, dictionaries and
-// private tags are not carried.
-var iccOrder = []struct {
-	sig   string
-	types []string
-}{
-	{"wtpt", []string{"XYZ "}}, {"bkpt", []string{"XYZ "}},
-	{"rXYZ", []string{"XYZ "}}, {"gXYZ", []string{"XYZ "}}, {"bXYZ", []string{"XYZ "}},
-	{"rTRC", []string{"curv", "para"}}, {"gTRC", []string{"curv", "para"}}, {"bTRC", []string{"curv", "para"}},
-	{"kTRC", []string{"curv", "para"}},
-	{"chad", []string{"sf32"}}, {"cicp", []string{"cicp"}},
+// a tone curve: sRGB's piecewise function, or a pure gamma
+type trc struct {
+	srgb  bool
+	gamma float64
 }
 
-// paraParams is how many parameters each parametric curve function has.
-var paraParams = map[uint16]int{0: 1, 1: 3, 2: 4, 3: 5, 4: 7}
+func (c trc) at(x float64) float64 {
+	if !c.srgb {
+		return math.Pow(x, c.gamma)
+	}
 
-// cleanICC rebuilds an ICC profile from what it says about colour, and nothing else. Every tag kept is parsed and
-// written again in its canonical form: reserved bytes zero, nothing after its numbers. The description and copyright
-// say "ICC"; the header keeps only the version, class, colour space, rendering intent and the standard D50 illuminant.
-// It carries matrix/TRC profiles (RGB) and TRC profiles (grey); anything else, and anything it cannot read, is
-// refused. It answers the profile and its colour space ("RGB " or "GRAY").
-func cleanICC(p []byte) ([]byte, string, error) {
-	if len(p) < iccHeader+4 || string(p[36:40]) != "acsp" || string(p[20:24]) != "XYZ " {
-		return nil, "", errProfile
+	if x < 0.04045 {
+		return x / 12.92
+	}
+
+	return math.Pow((x+0.055)/1.055, 2.4)
+}
+
+// knownProfile is a standard kreida carries: its name, its D50-adapted primaries and its tone curve.
+type knownProfile struct {
+	name    string
+	r, g, b [3]float64
+	curve   trc
+	icc     []byte
+}
+
+var knownProfiles = []*knownProfile{
+	{name: "sRGB", r: [3]float64{0.4361, 0.2225, 0.0139}, g: [3]float64{0.3851, 0.7169, 0.0971}, b: [3]float64{0.1431, 0.0606, 0.7141}, curve: trc{srgb: true}},
+	{name: "Display P3", r: [3]float64{0.5151, 0.2412, -0.0011}, g: [3]float64{0.2920, 0.6922, 0.0419}, b: [3]float64{0.1571, 0.0666, 0.7841}, curve: trc{srgb: true}},
+	{name: "Adobe RGB (1998)", r: [3]float64{0.6097, 0.3111, 0.0195}, g: [3]float64{0.2053, 0.6257, 0.0609}, b: [3]float64{0.1492, 0.0632, 0.7446}, curve: trc{gamma: 563.0 / 256}},
+}
+
+func init() {
+	for _, k := range knownProfiles {
+		k.icc = buildICC(k)
+	}
+}
+
+// knownICC names the standard a profile is, by its colour, and answers kreida's copy of it; nil when it is none.
+func knownICC(p []byte) []byte {
+	tags := readICC(p)
+	if tags == nil {
+		return nil
+	}
+
+	for _, k := range knownProfiles {
+		if near(tags["rXYZ"], k.r) && near(tags["gXYZ"], k.g) && near(tags["bXYZ"], k.b) &&
+			sameCurve(tags["rTRC"], k.curve) && sameCurve(tags["gTRC"], k.curve) && sameCurve(tags["bTRC"], k.curve) {
+			return k.icc
+		}
+	}
+
+	return nil
+}
+
+// readICC finds the matrix and tone curves of an RGB display profile. Nil when it is not one, or cannot be read.
+func readICC(p []byte) map[string][]byte {
+	if len(p) < iccHeader+4 || string(p[36:40]) != "acsp" || string(p[16:20]) != "RGB " || string(p[20:24]) != "XYZ " {
+		return nil
 	}
 
 	size := int(binary.BigEndian.Uint32(p))
 	if size < iccHeader+4 || size > len(p) {
-		return nil, "", errProfile
-	}
-
-	p = p[:size]
-
-	space := string(p[16:20])
-	if space != "RGB " && space != "GRAY" {
-		return nil, "", errProfile
-	}
-
-	if class := string(p[12:16]); class != "mntr" && class != "scnr" && class != "spac" {
-		return nil, "", errProfile
+		return nil
 	}
 
 	n := int(binary.BigEndian.Uint32(p[iccHeader:]))
 	if n > iccMaxTags || iccHeader+4+12*n > size {
-		return nil, "", errProfile
+		return nil
 	}
 
-	bodies := map[string][]byte{}
-	seen := map[string]bool{}
+	tags := map[string][]byte{}
 
 	for i := range n {
 		e := p[iccHeader+4+12*i:]
 		sig, off, length := string(e[:4]), int(binary.BigEndian.Uint32(e[4:])), int(binary.BigEndian.Uint32(e[8:]))
 
-		if seen[sig] || off < iccHeader+4+12*n || length < 8 || off > size-length {
-			return nil, "", errProfile
+		if length < 8 || off < 0 || off > size-length {
+			return nil
 		}
 
-		seen[sig] = true
-
-		at := slices.IndexFunc(iccOrder, func(t struct {
-			sig   string
-			types []string
-		}) bool {
-			return t.sig == sig
-		})
-		if at < 0 {
-			continue
+		if _, twice := tags[sig]; twice {
+			return nil
 		}
 
-		data := p[off : off+length]
-		if !slices.Contains(iccOrder[at].types, string(data[:4])) {
-			return nil, "", errProfile
-		}
-
-		body, err := iccBody(data)
-		if err != nil {
-			return nil, "", err
-		}
-
-		bodies[sig] = body
+		tags[sig] = p[off : off+length]
 	}
 
-	need := []string{"wtpt", "kTRC"}
-	if space == "RGB " {
-		need = []string{"wtpt", "rXYZ", "gXYZ", "bXYZ", "rTRC", "gTRC", "bTRC"}
+	return tags
+}
+
+// near says whether an XYZ tag holds these three values.
+func near(tag []byte, want [3]float64) bool {
+	if len(tag) < 20 || string(tag[:4]) != "XYZ " {
+		return false
 	}
 
-	for _, sig := range need {
-		if bodies[sig] == nil {
-			return nil, "", errProfile
+	for i := range 3 {
+		if math.Abs(s15(tag[8+4*i:])-want[i]) > primaryTolerance {
+			return false
 		}
 	}
 
-	v4 := p[8] >= 4
+	return true
+}
 
-	sigs := []string{"desc", "cprt"}
-	bodies["desc"], bodies["cprt"] = iccText(v4, true), iccText(v4, false)
+func s15(b []byte) float64 { return float64(int32(binary.BigEndian.Uint32(b))) / 65536 }
 
-	for _, t := range iccOrder {
-		if bodies[t.sig] != nil {
-			sigs = append(sigs, t.sig)
+// sameCurve says whether a curv or para tag draws the same tone curve, compared along its length.
+func sameCurve(tag []byte, want trc) bool {
+	f := curveOf(tag)
+	if f == nil {
+		return false
+	}
+
+	for i := 1; i <= 20; i++ {
+		x := float64(i) / 20
+		if math.Abs(f(x)-want.at(x)) > curveTolerance {
+			return false
 		}
+	}
+
+	return true
+}
+
+// curveOf reads a tone curve tag as a function on [0, 1]; nil when it cannot.
+func curveOf(tag []byte) func(float64) float64 {
+	if len(tag) < 12 {
+		return nil
+	}
+
+	switch string(tag[:4]) {
+	case "curv":
+		n := int(binary.BigEndian.Uint32(tag[8:]))
+		if n > iccMaxCurv || len(tag) < 12+2*n {
+			return nil
+		}
+
+		pts := make([]float64, n)
+		for i := range n {
+			pts[i] = float64(binary.BigEndian.Uint16(tag[12+2*i:])) / 65535
+		}
+
+		switch n {
+		case 0:
+			return func(x float64) float64 { return x }
+		case 1:
+			g := float64(binary.BigEndian.Uint16(tag[12:])) / 256
+
+			return func(x float64) float64 { return math.Pow(x, g) }
+		}
+
+		return func(x float64) float64 {
+			at := x * float64(n-1)
+			i := min(int(at), n-2)
+
+			return pts[i] + (pts[i+1]-pts[i])*(at-float64(i))
+		}
+	case "para":
+		k := map[uint16]int{0: 1, 1: 3, 2: 4, 3: 5, 4: 7}[binary.BigEndian.Uint16(tag[8:])]
+		if k == 0 && binary.BigEndian.Uint16(tag[8:]) != 0 || len(tag) < 12+4*max(k, 1) {
+			return nil
+		}
+
+		v := make([]float64, 7)
+		for i := range max(k, 1) {
+			v[i] = s15(tag[12+4*i:])
+		}
+
+		g, a, b, c, d, e, f := v[0], v[1], v[2], v[3], v[4], v[5], v[6]
+		pow := func(x float64) float64 { return math.Pow(math.Max(x, 0), g) }
+
+		switch binary.BigEndian.Uint16(tag[8:]) {
+		case 0:
+			return pow
+		case 1:
+			return func(x float64) float64 { return pow(a*x + b) }
+		case 2:
+			return func(x float64) float64 { return pow(a*x+b) + c }
+		case 3:
+			return func(x float64) float64 {
+				if x >= d {
+					return pow(a*x + b)
+				}
+
+				return c * x
+			}
+		case 4:
+			return func(x float64) float64 {
+				if x >= d {
+					return pow(a*x+b) + e
+				}
+
+				return c*x + f
+			}
+		}
+	}
+
+	return nil
+}
+
+// buildICC writes kreida's own version 2 display profile of a standard: its name, its primaries, its tone curve and
+// the D65 to D50 adaptation, nothing else.
+func buildICC(k *knownProfile) []byte {
+	xyz := func(v [3]float64) []byte {
+		out := []byte("XYZ \x00\x00\x00\x00")
+		for _, f := range v {
+			out = binary.BigEndian.AppendUint32(out, uint32(int32(math.Round(f*65536))))
+		}
+
+		return out
+	}
+
+	var curve []byte
+	if k.curve.srgb {
+		curve = []byte("para\x00\x00\x00\x00\x00\x03\x00\x00")
+		for _, f := range []float64{2.4, 1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045} {
+			curve = binary.BigEndian.AppendUint32(curve, uint32(int32(math.Round(f*65536))))
+		}
+	} else {
+		curve = binary.BigEndian.AppendUint16([]byte("curv\x00\x00\x00\x00\x00\x00\x00\x01"), uint16(math.Round(k.curve.gamma*256)))
+	}
+
+	chad := []byte("sf32\x00\x00\x00\x00")
+	for _, f := range []float64{1.0479, 0.0229, -0.0502, 0.0296, 0.9904, -0.0171, -0.0092, 0.0151, 0.7519} {
+		chad = binary.BigEndian.AppendUint32(chad, uint32(int32(math.Round(f*65536))))
+	}
+
+	desc := slices.Concat([]byte("desc\x00\x00\x00\x00"), binary.BigEndian.AppendUint32(nil, uint32(len(k.name)+1)), []byte(k.name), make([]byte, 1+4+4+2+1+67))
+
+	tags := []struct {
+		sig  string
+		body []byte
+	}{
+		{"desc", desc}, {"cprt", []byte("text\x00\x00\x00\x00No copyright, use freely\x00")},
+		{"wtpt", xyz([3]float64{0.9642, 1, 0.8249})},
+		{"rXYZ", xyz(k.r)}, {"gXYZ", xyz(k.g)}, {"bXYZ", xyz(k.b)},
+		{"rTRC", curve}, {"gTRC", curve}, {"bTRC", curve}, {"chad", chad},
 	}
 
 	head := make([]byte, iccHeader)
-	copy(head[8:10], p[8:10])
-	copy(head[12:24], p[12:24])
-	copy(head[36:40], "acsp")
+	copy(head[8:], []byte{2, 0x10})
+	copy(head[12:], "mntrRGB XYZ ")
+	copy(head[36:], "acsp")
+	copy(head[68:], []byte{0, 0, 0xf6, 0xd6, 0, 1, 0, 0, 0, 0, 0xd3, 0x2d})
 
-	if intent := binary.BigEndian.Uint32(p[64:]); intent <= 3 {
-		binary.BigEndian.PutUint32(head[64:], intent)
-	}
+	table := iccHeader + 4 + 12*len(tags)
 
-	copy(head[68:80], []byte{0, 0, 0xf6, 0xd6, 0, 1, 0, 0, 0, 0, 0xd3, 0x2d})
+	var data, entries []byte
 
-	// the same body twice (one curve for three channels) is written once
-	table := iccHeader + 4 + 12*len(sigs)
-	var data []byte
+	shared := map[string]int{}
 
-	entries := make([]byte, 0, 12*len(sigs))
-
-	for _, sig := range sigs {
-		body := bodies[sig]
-
-		off := bytes.Index(data, body)
-		if off < 0 || off%4 != 0 {
+	for _, t := range tags {
+		off, ok := shared[string(t.body)]
+		if !ok {
 			for len(data)%4 != 0 {
 				data = append(data, 0)
 			}
 
-			off = len(data)
-			data = append(data, body...)
+			off = table + len(data)
+			shared[string(t.body)] = off
+			data = append(data, t.body...)
 		}
 
-		entries = append(entries, sig...)
-		entries = binary.BigEndian.AppendUint32(entries, uint32(table+off))
-		entries = binary.BigEndian.AppendUint32(entries, uint32(len(body)))
+		entries = append(entries, t.sig...)
+		entries = binary.BigEndian.AppendUint32(entries, uint32(off))
+		entries = binary.BigEndian.AppendUint32(entries, uint32(len(t.body)))
 	}
 
 	for len(data)%4 != 0 {
 		data = append(data, 0)
 	}
 
-	out := slices.Concat(head, binary.BigEndian.AppendUint32(nil, uint32(len(sigs))), entries, data)
+	out := slices.Concat(head, binary.BigEndian.AppendUint32(nil, uint32(len(tags))), entries, data)
 	binary.BigEndian.PutUint32(out, uint32(len(out)))
 
-	return out, space, nil
-}
-
-// iccBody writes a colour tag again from its numbers: its type, four zero bytes, then exactly what the type holds.
-func iccBody(d []byte) ([]byte, error) {
-	typ := string(d[:4])
-	out := append([]byte(typ), 0, 0, 0, 0)
-
-	switch typ {
-	case "XYZ ":
-		if len(d) < 20 {
-			return nil, errProfile
-		}
-
-		return append(out, d[8:20]...), nil
-	case "sf32":
-		if len(d) < 44 {
-			return nil, errProfile
-		}
-
-		return append(out, d[8:44]...), nil
-	case "cicp":
-		if len(d) < 12 {
-			return nil, errProfile
-		}
-
-		return append(out, d[8:12]...), nil
-	case "curv":
-		if len(d) < 12 {
-			return nil, errProfile
-		}
-
-		n := int(binary.BigEndian.Uint32(d[8:]))
-		if n > iccMaxCurv || len(d) < 12+2*n {
-			return nil, errProfile
-		}
-
-		return slices.Concat(out, d[8:12+2*n]), nil
-	case "para":
-		if len(d) < 12 {
-			return nil, errProfile
-		}
-
-		fn := binary.BigEndian.Uint16(d[8:])
-
-		k, ok := paraParams[fn]
-		if !ok || len(d) < 12+4*k {
-			return nil, errProfile
-		}
-
-		return slices.Concat(out, d[8:10], []byte{0, 0}, d[12:12+4*k]), nil
-	}
-
-	return nil, errProfile
-}
-
-// iccText is the text "ICC" as a profile of that version writes a description (desc) or a copyright.
-func iccText(v4, desc bool) []byte {
-	if v4 {
-		// multiLocalizedUnicode: one record, en-US, "ICC" in UTF-16BE
-		return []byte("mluc\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x0cenUS\x00\x00\x00\x06\x00\x00\x00\x1c\x00I\x00C\x00C")
-	}
-
-	if desc {
-		// textDescription: ASCII "ICC", no Unicode, no ScriptCode
-		return append([]byte("desc\x00\x00\x00\x00\x00\x00\x00\x04ICC\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"), make([]byte, 67)...)
-	}
-
-	return []byte("text\x00\x00\x00\x00ICC\x00")
+	return out
 }

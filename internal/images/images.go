@@ -49,10 +49,12 @@ var shaRe = regexp.MustCompile(`^[0-9a-f]{64}$`)
 // ValidSHA reports whether s has the form of an image's hash.
 func ValidSHA(s string) bool { return shaRe.MatchString(s) }
 
-// File is a checked image: what a card says about it and its bytes.
+// File is a checked image: what a card says about it and its bytes. Note is what the owner should know about a
+// cleaned one (see Clean): it goes out, but not quite as it is on this machine.
 type File struct {
 	board.Image
 	Bytes []byte
+	Note  string
 }
 
 // DataURL is the file as one `data:` address, for a page that has no server to ask.
@@ -245,6 +247,8 @@ type Set struct {
 	Files map[string]File
 	// Problems are the cards whose picture cannot be shown, in file order.
 	Problems []Problem
+	// Notes are cards whose picture goes out other than it looks here (a colour profile dropped), in file order.
+	Notes []Problem
 }
 
 // DataURLs is the set as the map of a standalone page: hash to `data:` address. Nil when there are none.
@@ -282,10 +286,12 @@ func Public(b *board.Board, dir string) Set {
 	return set
 }
 
-// loaded is what one path came to: the picture a card shows, the size it counts against the board, or why not.
+// loaded is what one path came to: the picture a card shows, the size it counts against the board, what the owner
+// should know about it, or why not.
 type loaded struct {
 	show File
 	size int
+	note string
 	err  error
 }
 
@@ -309,7 +315,7 @@ func collect(b *board.Board, dir string, public bool) Set {
 				err = refuse(reasonOf(err), "%s: %s", path, err)
 			} else {
 				// the browser turns the file by its EXIF, so the owner's card is sized like the upright picture
-				l.show, l.size = f, len(c.Bytes)
+				l.show, l.size, l.note = f, len(c.Bytes), c.Note
 				l.show.W, l.show.H = c.W, c.H
 
 				if public {
@@ -338,6 +344,10 @@ func collect(b *board.Board, dir string, public bool) Set {
 			n.Image = &board.Image{Error: reasonOf(l.err)}
 
 			continue
+		}
+
+		if l.note != "" {
+			set.Notes = append(set.Notes, Problem{Node: n.ID, Err: fmt.Errorf("%s: %s", path, l.note)})
 		}
 
 		if _, have := set.Files[l.show.SHA256]; !have {

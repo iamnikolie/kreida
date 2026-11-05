@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"hash/crc32"
 	"image"
+	"image/jpeg"
 	"image/png"
 	"os"
 	"path/filepath"
@@ -90,4 +91,25 @@ func TestExportStripsWhatThePictureCarries(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, string(html), base64.StdEncoding.EncodeToString(data))
 	assert.NotContains(t, string(html), base64.StdEncoding.EncodeToString(raw))
+}
+
+func TestExportTellsTheOwnerAProfileWasDropped(t *testing.T) {
+	e := newEnv(t)
+	require.NoError(t, os.MkdirAll(e.dir, 0o755))
+
+	var plain bytes.Buffer
+	require.NoError(t, jpeg.Encode(&plain, image.NewRGBA(image.Rect(0, 0, 4, 2)), nil))
+
+	body := []byte("ICC_PROFILE\x00\x01\x01not a profile kreida knows")
+	app2 := append([]byte{0xff, 0xe2, byte((len(body) + 2) >> 8), byte(len(body) + 2)}, body...)
+	jpg := append(append(append([]byte{}, plain.Bytes()[:2]...), app2...), plain.Bytes()[2:]...)
+	require.NoError(t, os.WriteFile(filepath.Join(e.dir, "a.jpg"), jpg, 0o644))
+
+	_, _, err := e.run("nodes:\n  a: { title: A, image: a.jpg }\n", "set", "x")
+	require.NoError(t, err)
+
+	_, errOut, err := e.run("", "export", "x", "-o", filepath.Join(t.TempDir(), "x.html"))
+	require.NoError(t, err)
+	assert.Contains(t, errOut, "card a: image")
+	assert.Contains(t, errOut, "colours may shift")
 }

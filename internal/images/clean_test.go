@@ -16,7 +16,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"slices"
-	"strings"
 	"testing"
 
 	"github.com/iamnikolie/kreida/internal/images"
@@ -126,7 +125,7 @@ func TestAWebPGoesOutAsAPNGOrAJPEGWithoutItsTags(t *testing.T) {
 	c := clean(t, raw)
 	assert.Equal(t, "image/png", c.Type)
 	assert.NotContains(t, string(c.Bytes), "secret")
-	assertCleanProfile(t, iccOf(t, c))
+	assertOurProfile(t, iccOf(t, c), "sRGB")
 	assert.Equal(t, 12, c.W)
 	assert.Equal(t, 7, c.H)
 
@@ -395,35 +394,62 @@ func withPNGProfile(t *testing.T, p, profile []byte, name string) []byte {
 	return slices.Concat(p[:at], pngChunk("gAMA", []byte{0, 0, 0xb1, 0x8f}), pngChunk("iCCP", slices.Concat([]byte(name+"\x00\x00"), z.Bytes())), p[at:])
 }
 
-// assertCleanProfile checks a cleaned profile against the fixture it came from: no words, the colour tags whole.
-func assertCleanProfile(t *testing.T, profile []byte) {
+// assertOurProfile checks that a picture carries kreida's own copy of a standard profile, and nothing of the one it had.
+func assertOurProfile(t *testing.T, profile []byte, name string) {
 	t.Helper()
 
 	assert.NotContains(t, string(profile), "secret")
 	assert.NotContains(t, string(profile), "SCRT")
 	assert.NotContains(t, string(profile), "MODL")
+	assert.Contains(t, string(profile), name)
+	assert.Contains(t, string(profile), "No copyright, use freely")
 	assert.Equal(t, len(profile), int(binary.BigEndian.Uint32(profile)))
 	assert.Equal(t, "acsp", string(profile[36:40]))
-	assert.Contains(t, string(profile), "curv\x00\x00\x00\x00\x00\x00\x00\x01\x02\x33", "the tone curve stays")
-	assert.Contains(t, string(profile), "TRC")
-	assert.Contains(t, string(profile), "desc")
-	assert.NotContains(t, string(profile), "dmdd")
-	assert.NotContains(t, string(profile), "priv")
 }
 
-func TestAColourProfileLosesItsWordsAndKeepsItsColour(t *testing.T) {
+func TestAKnownProfileIsReplacedByKreidasOwn(t *testing.T) {
 	rgb := fixture(t, "rgb.icc")
 
 	j := clean(t, withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), rgb))
-	assertCleanProfile(t, iccOf(t, j))
+	assertOurProfile(t, iccOf(t, j), "sRGB")
+	assert.Empty(t, j.Note)
 
 	p := clean(t, withPNGProfile(t, taggedPNG(t, 4, 2, 1, "s"), rgb, "Private-person-machine-profile"))
 	assert.NotContains(t, string(p.Bytes), "Private-person")
-	assertCleanProfile(t, iccOf(t, p))
-	assert.Contains(t, string(p.Bytes), "gAMA")
+	assert.NotContains(t, string(p.Bytes), "gAMA")
+	assertOurProfile(t, iccOf(t, p), "sRGB")
+
+	// whatever the sRGB profile said, the copy that goes out is the same
+	assert.Equal(t, iccOf(t, j), iccOf(t, p))
 }
 
-func TestASystemProfileKeepsEveryColourTag(t *testing.T) {
+func TestAnyOtherProfileIsDroppedAndTheOwnerTold(t *testing.T) {
+	for name, profile := range map[string][]byte{
+		"unknown curve": fixture(t, "odd.icc"),
+		"grey":          fixture(t, "gray.icc"),
+		"unreadable":    []byte("not a profile, private-unreadable"),
+	} {
+		c := clean(t, withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), profile))
+		assert.NotContains(t, string(c.Bytes), "ICC_PROFILE", name)
+		assert.NotContains(t, string(c.Bytes), "secret", name)
+		assert.NotContains(t, string(c.Bytes), "private", name)
+		assert.Contains(t, c.Note, "colours may shift", name)
+	}
+
+	dir := t.TempDir()
+	write(t, filepath.Join(dir, "a.jpg"), withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), fixture(t, "odd.icc")))
+
+	b := parse(t, "nodes:\n  a: {title: A, image: a.jpg}\n")
+	set := images.Public(b, dir)
+	require.NotNil(t, b.Nodes[0].Image, "the picture still goes")
+	require.Len(t, set.Notes, 1)
+	assert.Contains(t, set.Notes[0].String(), "a.jpg")
+
+	// a picture without a profile has nothing to say
+	assert.Empty(t, clean(t, taggedJPEG(t, 16, 8, 1, "s")).Note)
+}
+
+func TestASystemProfileIsRecognised(t *testing.T) {
 	sys, err := os.ReadFile("/System/Library/ColorSync/Profiles/Display P3.icc")
 	if err != nil {
 		t.Skip("no Display P3 profile on this machine")
@@ -431,11 +457,8 @@ func TestASystemProfileKeepsEveryColourTag(t *testing.T) {
 
 	j := clean(t, withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), sys))
 	out := iccOf(t, j)
-
-	n := func(p []byte) int { return int(binary.BigEndian.Uint32(p[128:])) }
-	assert.Equal(t, n(sys), n(out), "all of its tags are matrix, curves or desc/cprt")
-	assert.Equal(t, sys[16:20], out[16:20])
-	assert.Equal(t, sys[64:80], out[64:80], "rendering intent and the D50 illuminant")
+	assertOurProfile(t, out, "Display P3")
+	assert.NotContains(t, string(out), "Apple")
 }
 
 func TestATurnedPictureKeepsItsColour(t *testing.T) {
@@ -443,48 +466,65 @@ func TestATurnedPictureKeepsItsColour(t *testing.T) {
 
 	j := clean(t, withJPEGProfile(taggedJPEG(t, 32, 16, 6, "s"), rgb))
 	assert.Equal(t, 16, j.W)
-	assertCleanProfile(t, iccOf(t, j))
+	assertOurProfile(t, iccOf(t, j), "sRGB")
 
 	_, err := jpeg.Decode(bytes.NewReader(j.Bytes))
 	require.NoError(t, err)
 
 	p := clean(t, withPNGProfile(t, taggedPNG(t, 4, 2, 6, "s"), rgb, "x"))
 	assert.Equal(t, 2, p.W)
-	assertCleanProfile(t, iccOf(t, p))
-	assert.Contains(t, string(p.Bytes), "gAMA")
+	assertOurProfile(t, iccOf(t, p), "sRGB")
 
-	// a grey picture stays grey when turned, and keeps its grey profile
+	// a grey picture stays grey when turned
 	var gray bytes.Buffer
 	require.NoError(t, jpeg.Encode(&gray, image.NewGray(image.Rect(0, 0, 32, 16)), nil))
 
 	exif := segment(0xe1, append([]byte("Exif\x00\x00"), exifTIFF(6, "s")...))
 	g := clean(t, withJPEGProfile(slices.Concat(gray.Bytes()[:2], exif, gray.Bytes()[2:]), fixture(t, "gray.icc")))
 	assert.Equal(t, 16, g.W)
-	assertCleanProfile(t, iccOf(t, g))
 
 	gimg, err := jpeg.Decode(bytes.NewReader(g.Bytes))
 	require.NoError(t, err)
 	assert.IsType(t, &image.Gray{}, gimg)
-
-	// a grey profile on a colour picture fits nothing
-	_, err = images.Clean(load(t, withJPEGProfile(taggedJPEG(t, 32, 16, 6, "s"), fixture(t, "gray.icc"))))
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "does not fit its pixels")
 }
 
-func TestABrokenProfileIsRefused(t *testing.T) {
+func TestAProfileInPiecesThatDoNotAddUpIsDropped(t *testing.T) {
 	rgb := fixture(t, "rgb.icc")
-	bad := append([]byte{}, rgb...)
-	binary.BigEndian.PutUint32(bad[128+4+4:], 1<<30) // the first tag points far past the end
+	jpg := taggedJPEG(t, 16, 8, 1, "s")
 
-	_, err := images.Clean(load(t, withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), bad)))
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "colour profile")
+	missing := slices.Concat(jpg[:2], segment(0xe2, slices.Concat([]byte("ICC_PROFILE\x00\x02\x02"), rgb)), jpg[2:])
+	c := clean(t, missing)
+	assert.NotContains(t, string(c.Bytes), "ICC_PROFILE")
+	assert.Contains(t, c.Note, "colours may shift")
+}
 
-	missing := slices.Concat(taggedJPEG(t, 16, 8, 1, "s")[:2], segment(0xe2, slices.Concat([]byte("ICC_PROFILE\x00\x02\x02"), rgb)), taggedJPEG(t, 16, 8, 1, "s")[2:])
-	_, err = images.Clean(load(t, missing))
-	require.Error(t, err)
-	assert.True(t, strings.Contains(err.Error(), "do not add up"))
+func TestUnusedPaletteEntriesDoNotRideOut(t *testing.T) {
+	// a palette whose unused colours spell text
+	pal := color.Palette{color.NRGBA{0, 0, 0, 255}, color.NRGBA{255, 255, 255, 255}}
+	for _, ch := range []byte("private-palette-text") {
+		pal = append(pal, color.NRGBA{ch, ch, ch, 255})
+	}
+
+	img := image.NewPaletted(image.Rect(0, 0, 4, 2), pal)
+	img.Pix[3] = 1
+
+	var p, g bytes.Buffer
+	require.NoError(t, png.Encode(&p, img))
+	require.NoError(t, gif.EncodeAll(&g, &gif.GIF{Image: []*image.Paletted{img, img}, Delay: []int{5, 5}}))
+
+	spelled := func(b []byte) bool { return bytes.Contains(b, []byte("ppprrriii")) }
+	require.True(t, spelled(p.Bytes()))
+	require.True(t, spelled(g.Bytes()))
+
+	for _, raw := range [][]byte{p.Bytes(), g.Bytes()} {
+		c := clean(t, raw)
+		assert.False(t, spelled(c.Bytes), c.Type)
+	}
+
+	out, err := gif.DecodeAll(bytes.NewReader(clean(t, g.Bytes()).Bytes))
+	require.NoError(t, err)
+	assert.Len(t, out.Image, 2)
+	assert.Len(t, out.Image[0].Palette, 2)
 }
 
 // ----- second review
@@ -538,37 +578,30 @@ func profileWith(t *testing.T, body []byte) []byte {
 	return p
 }
 
-func TestATagKeepsOnlyItsNumbers(t *testing.T) {
+func TestNothingOfAForeignProfileGoesOut(t *testing.T) {
+	points := []byte("curv\x00\x00\x00\x00\x00\x00\x00\x0a")
+	points = append(points, "private-curve-text!!"...)
+
 	for name, body := range map[string][]byte{
 		"text after a curve":    []byte("curv\x00\x00\x00\x00\x00\x00\x00\x01\x02\x33private-profile-owner@example.test"),
 		"text in reserved":      []byte("curvUSER\x00\x00\x00\x01\x02\x33\x00\x00"),
 		"text after no points":  []byte("curv\x00\x00\x00\x00\x00\x00\x00\x00private-zero-count"),
 		"text after parameters": []byte("paraSECR\x00\x00PRIV\x00\x02\x33\x33private-para"),
+		"text as curve points":  points,
 	} {
 		c := clean(t, withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), profileWith(t, body)))
-		out := string(iccOf(t, c))
-		assert.NotContains(t, out, "private", name)
-		assert.NotContains(t, out, "USER", name)
-		assert.NotContains(t, out, "SECR", name)
-		assert.NotContains(t, out, "PRIV", name)
-	}
 
-	// a colour tag under a name kreida does not carry, and a tag twice
-	p := append([]byte{}, fixture(t, "rgb.icc")...)
-	for i := range int(binary.BigEndian.Uint32(p[128:])) {
-		if e := 128 + 4 + 12*i; string(p[e:e+4]) == "bkpt" || string(p[e:e+4]) == "priv" {
-			copy(p[e:], "zzzz")
+		for _, word := range []string{"private", "USER", "SECR", "PRIV", "secret"} {
+			assert.NotContains(t, string(c.Bytes), word, name)
 		}
 	}
 
-	out := string(iccOf(t, clean(t, withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), p))))
-	assert.NotContains(t, out, "zzzz")
-
+	// sRGB with a tag twice cannot be read: dropped
 	twice := append([]byte{}, fixture(t, "rgb.icc")...)
 	copy(twice[128+4+12*3:], "wtpt")
 
-	_, err := images.Clean(load(t, withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), twice)))
-	require.Error(t, err)
+	c := clean(t, withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), twice))
+	assert.NotContains(t, string(c.Bytes), "ICC_PROFILE")
 }
 
 func TestOverlappingTagsCannotBlowAProfileUp(t *testing.T) {
@@ -608,13 +641,8 @@ func TestOverlappingTagsCannotBlowAProfileUp(t *testing.T) {
 	}
 
 	c := clean(t, withPNGProfile(t, taggedPNG(t, 4, 2, 1, "s"), p, "x"))
-	assert.Less(t, len(iccOf(t, c)), 12<<10, "the 4096-point curve once, not a hundred times")
-
-	// the same tag name twice is refused
-	copy(p[128+4+12*8:], "rTRC")
-
-	_, err := images.Clean(load(t, withPNGProfile(t, taggedPNG(t, 4, 2, 1, "s"), p, "x")))
-	require.Error(t, err)
+	assert.Less(t, len(c.Bytes), 4<<10, "nothing of the profile is copied, however it is laid out")
+	assert.NotContains(t, string(c.Bytes), "iCCP")
 }
 
 func TestUnusedBytesInsideAStreamDoNotRideOut(t *testing.T) {

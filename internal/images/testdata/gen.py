@@ -49,11 +49,27 @@ def icc(space, tags):
 
 
 curve = b"curv\0\0\0\0\0\0\0\x01\x02\x33\0\0"
-rgb = icc(b"RGB ", [("wtpt", xyz(0.9642, 1.0, 0.8249)), ("rXYZ", xyz(0.4361, 0.2225, 0.0139)),
-                    ("gXYZ", xyz(0.3851, 0.7169, 0.0971)), ("bXYZ", xyz(0.1431, 0.0606, 0.7141)),
-                    ("rTRC", curve), ("gTRC", curve), ("bTRC", curve)])
+gamma18 = b"curv\0\0\0\0\0\0\0\x01\x01\xcd\0\0"
+
+
+def fixed(v):
+    return struct.pack(">i", round(v * 65536))
+
+
+# sRGB's own curve, as a 1024-point table: what most cameras embed
+srgb = b"curv\0\0\0\0" + struct.pack(">I", 1024) + b"".join(
+    struct.pack(">H", round(65535 * ((x / 1023) / 12.92 if x / 1023 < 0.04045 else (((x / 1023) + 0.055) / 1.055) ** 2.4)))
+    for x in range(1024))
+matrix = [("wtpt", xyz(0.9642, 1.0, 0.8249)), ("rXYZ", xyz(0.4361, 0.2225, 0.0139)),
+          ("gXYZ", xyz(0.3851, 0.7169, 0.0971)), ("bXYZ", xyz(0.1431, 0.0606, 0.7141))]
+
+# an sRGB profile that says secret things: kreida sends its own sRGB instead
+rgb = icc(b"RGB ", matrix + [("rTRC", srgb), ("gTRC", srgb), ("bTRC", srgb)])
+# sRGB primaries with a 1.8 gamma: no standard kreida knows, so dropped
+odd = icc(b"RGB ", matrix + [("rTRC", gamma18), ("gTRC", gamma18), ("bTRC", gamma18)])
 gray = icc(b"GRAY", [("wtpt", xyz(0.9642, 1.0, 0.8249)), ("kTRC", curve)])
 open("rgb.icc", "wb").write(rgb)
+open("odd.icc", "wb").write(odd)
 open("gray.icc", "wb").write(gray)
 
 
