@@ -19,4 +19,11 @@
 /* on a phone the steps to come are not shown at all (D-2026-10-29-02, row c): at that size a faint ghost, clipped at the
    edges, reads as a broken render; the counter says there is more. Before the export rule below, which brings them all back. */
 .phone .react-flow__node.fog, .phone .react-flow__edge.fog { opacity: 0; pointer-events: none; }
+/* on a phone or a tablet a step changes at once, without the fade. A step fades every card and edge together while the
+   view pans; each fading one becomes its own composited layer at DPR 3 and iOS Safari's content process runs out of
+   memory ("A problem repeatedly occurred"). Not only .phone (a share link held upright): the same phone turned
+   sideways, the editor and an export on it are touch screens too. In WebKit with an iPhone 15 profile the first step
+   took +340 MB with the fade and under 20 MB without it. */
+.phone .react-flow__node, .phone .react-flow__edge { transition: none; }
+@media (pointer: coarse) { .react-flow__node, .react-flow__edge { transition: none; } }
 .exporting .react-flow__node.fog, .exporting .react-flow__edge.fog { opacity: 1; transition: none; }
