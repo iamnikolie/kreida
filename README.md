@@ -61,11 +61,17 @@ picture is absent, while exports and share links show the card without it.
 
 A path never leaves your machine. Exports, share links, and published boards
 carry the image bytes with their metadata removed: EXIF (including GPS), XMP,
-IPTC, comments, PNG text chunks, and data after the picture. Colour profiles
-are kept. A photo rotated by its EXIF orientation is rotated in its pixels
-first, so it keeps the same appearance. A file that cannot be stripped is
-refused rather than sent unchanged, and so is a WebP rotated by its EXIF
-orientation. Your local editor and `kreida png` show the original file.
+IPTC, comments, PNG text chunks, and data after the picture. Every picture is
+fully decoded first, and a PNG is re-encoded losslessly; an animated PNG
+becomes its first frame. Colour profiles are kept with their descriptive text,
+names, and dates removed. A photo rotated by its EXIF orientation is rotated in
+its pixels first, together with its colour profile, so it keeps the same
+appearance.
+
+Some files are refused rather than sent unchanged: a file that cannot be
+stripped or does not decode, an animated WebP, a WebP rotated by its EXIF
+orientation, and a rotated picture whose grey or CMYK profile cannot follow the
+rotation. Your local editor and `kreida png` show the original file.
 
 A board can name any image you can read, so check its paths before you send an
 export or share a link.

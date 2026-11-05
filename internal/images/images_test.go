@@ -272,14 +272,14 @@ func TestPublicDropsTheReasonAndKeepsTheProblem(t *testing.T) {
 	assert.Contains(t, set.Problems[0].String(), "nope.png", "the owner hears which file")
 }
 
-func TestTrackerSeesAnImageChangeNotTheFirstLookNorABoardEdit(t *testing.T) {
+func TestTrackerSeesAnImageChangeNotABoardEditAlone(t *testing.T) {
 	dir := t.TempDir()
 	file := filepath.Join(dir, "x.yaml")
 	img := write(t, filepath.Join(dir, "a.png"), pngBytes(t, 2, 2))
 	write(t, file, []byte("nodes:\n  a: {title: A, image: a.png}\n"))
 
 	tr := images.NewTracker()
-	assert.False(t, tr.Changed("x", file, dir), "the first look")
+	assert.True(t, tr.Changed("x", file, dir), "the first look at a board with images")
 	assert.False(t, tr.Changed("x", file, dir), "nothing happened")
 
 	write(t, img, pngBytes(t, 3, 3))
@@ -290,8 +290,35 @@ func TestTrackerSeesAnImageChangeNotTheFirstLookNorABoardEdit(t *testing.T) {
 	assert.True(t, tr.Changed("x", file, dir), "the image went away")
 
 	write(t, file, []byte("title: edited\nnodes:\n  a: {title: A, image: a.png}\n"))
-	assert.False(t, tr.Changed("x", file, dir), "the board's own change has its own event")
+	assert.False(t, tr.Changed("x", file, dir), "the board's own edit has its own event")
 
 	require.NoError(t, os.Remove(file))
+	assert.False(t, tr.Changed("x", file, dir))
+
+	plain := filepath.Join(dir, "plain.yaml")
+	write(t, plain, []byte("nodes:\n  a: A\n"))
+	assert.False(t, tr.Changed("plain", plain, dir), "a board without images never changes here")
+}
+
+func TestAnImageChangeRightAfterABoardEditIsNotSwallowed(t *testing.T) {
+	dir := t.TempDir()
+	file := filepath.Join(dir, "x.yaml")
+	img := write(t, filepath.Join(dir, "a.png"), pngBytes(t, 4, 2))
+	write(t, file, []byte("nodes:\n  a: {title: A, image: a.png}\n"))
+
+	tr := images.NewTracker()
+	tr.Changed("x", file, dir)
+
+	// the board is edited; its own event pushes it with the image as it is then
+	write(t, file, []byte("title: edited\nnodes:\n  a: {title: A, image: a.png}\n"))
+
+	pushed := parse(t, "nodes:\n  a: {title: A, image: a.png}\n")
+	images.Public(pushed, dir)
+	require.Equal(t, 4, pushed.Nodes[0].Image.W)
+
+	// the image changes before the next look
+	write(t, img, pngBytes(t, 6, 2))
+
+	assert.True(t, tr.Changed("x", file, dir), "the next look tells it")
 	assert.False(t, tr.Changed("x", file, dir))
 }

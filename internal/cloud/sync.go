@@ -293,12 +293,15 @@ func (s *Syncer) upload(ctx context.Context, cl *Client, name string, up Upload,
 		}
 
 		sent := 0
+		done := map[string]bool{}
 
 		for _, sha := range missing.SHA256 {
 			f, ok := up.Images[sha]
-			if !ok {
+			if !ok || done[sha] {
 				continue
 			}
+
+			done[sha] = true
 
 			if err := cl.PutImage(ctx, name, f); err != nil {
 				return Published{}, err

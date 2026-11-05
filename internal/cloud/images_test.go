@@ -295,3 +295,17 @@ func TestARepeatPublishOfTheSameFileUploadsNothing(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, c.count("PUT", sent[0].Path[len("/api/cli/boards/x"):]))
 }
+
+func TestAHashTheCloudNamesTwiceGoesUpOnce(t *testing.T) {
+	p := scratch(t)
+	f := boardWithImage(t, p, "x", "a.png", picture(t, 4, 2))
+	require.NoError(t, os.WriteFile(p.BoardFile("x"), []byte("nodes:\n  a: { title: A, image: a.png }\n  b: { title: B, image: a.png }\n  c: { title: C, image: a.png }\n"), 0o644))
+
+	c := newImageCloud(t)
+	login(t, p, c.fakeCloud)
+
+	s, _ := newSyncer(t, p)
+	_, err := s.Publish(context.Background(), "x")
+	require.NoError(t, err)
+	assert.Equal(t, 1, c.count("PUT", "/images/"+f.SHA256))
+}

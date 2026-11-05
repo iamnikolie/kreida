@@ -1,11 +1,12 @@
 module github.com/iamnikolie/kreida
 
-go 1.24
+go 1.24.0
 
 require (
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.10.0
+	golang.org/x/image v0.33.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

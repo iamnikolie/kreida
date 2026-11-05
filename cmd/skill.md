@@ -249,9 +249,11 @@ show the card without a picture and without the reason. Read stderr before you s
 
 What leaves the machine: the path never does, in any JSON or file, only the bytes, and those stripped of metadata first.
 An export, a share link and a publish drop EXIF (GPS, camera, dates), XMP, IPTC, comments, PNG text chunks and anything
-after the picture, in all four formats; a colour profile stays. A photo that EXIF turns is turned in its pixels first
-(a turned JPEG is saved again at quality 92), so it stands as on your screen. A file that cannot be stripped is refused,
-never sent as is, and so is a WebP that EXIF turns (save it upright). Your own editor and `kreida png` show the file as
+after the picture, in all four formats. Every picture is decoded whole first; a PNG is written again losslessly (an
+animated PNG becomes its first image). A colour profile stays, with its description, copyright, names and dates taken
+out. A photo that EXIF turns is turned in its pixels first, its colour profile with it (a turned JPEG is saved again at
+quality 92). Refused, never sent as is: a file that cannot be stripped or whose pixels do not decode, an animated WebP,
+a WebP that EXIF turns, a turned picture whose profile cannot follow (grey or CMYK); save those upright or as PNG. Your own editor and `kreida png` show the file as
 it is. An export or a publish still carries the picture of any image the board names, so check where a board's paths
 point before you send it. On a published board only that board's images go up. A changed image file reaches the open page and, for a
 published board, the cloud within seconds, by the same route as a changed board.

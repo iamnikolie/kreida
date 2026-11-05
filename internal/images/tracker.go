@@ -30,8 +30,11 @@ type tracked struct {
 // NewTracker returns a Tracker that knows no board yet.
 func NewTracker() *Tracker { return &Tracker{seen: map[string]*tracked{}} }
 
-// Changed says whether an image of the board changed since the last call. The first look at a board, and a look at a
-// board whose own file changed, are never a change: that file's change has its own event.
+// Changed says whether the board's images differ from what the last call saw: a file changed, came or went, or the
+// board names other files. The board file's own edits are read for the list of paths only. A change is never taken
+// for granted because the board file changed too: whoever pushed that edit may have read the images before this
+// one landed. The first look at a board with images is a change, for the same reason. A change told twice costs a
+// push that finds nothing new.
 func (t *Tracker) Changed(name, file, dir string) bool {
 	st, err := os.Stat(file)
 	if err != nil {
@@ -41,16 +44,13 @@ func (t *Tracker) Changed(name, file, dir string) bool {
 	}
 
 	cur := t.seen[name]
-	if cur == nil || !cur.mtime.Equal(st.ModTime()) || cur.size != st.Size() {
-		cur = &tracked{mtime: st.ModTime(), size: st.Size(), paths: pathsOf(file, dir)}
-		cur.print = fingerprint(cur.paths)
+	if cur == nil {
+		cur = &tracked{}
 		t.seen[name] = cur
-
-		return false
 	}
 
-	if len(cur.paths) == 0 {
-		return false
+	if !cur.mtime.Equal(st.ModTime()) || cur.size != st.Size() || cur.paths == nil {
+		cur.mtime, cur.size, cur.paths = st.ModTime(), st.Size(), pathsOf(file, dir)
 	}
 
 	now := fingerprint(cur.paths)
@@ -63,19 +63,20 @@ func (t *Tracker) Changed(name, file, dir string) bool {
 	return true
 }
 
-// pathsOf lists the image files a board names. A board that does not parse names none.
+// pathsOf lists the image files a board names. A board that does not parse names none. The list is never nil, so a
+// board without images is not read again on every look.
 func pathsOf(file, dir string) []string {
+	out := []string{}
+
 	text, err := os.ReadFile(file)
 	if err != nil {
-		return nil
+		return out
 	}
 
 	b, err := board.Parse(string(text))
 	if err != nil {
-		return nil
+		return out
 	}
-
-	var out []string
 
 	for _, n := range b.Nodes {
 		if n.ImagePath != "" {
