@@ -482,12 +482,21 @@ func cleanGIF(d []byte) ([]byte, error) {
 		return nil, errPixels
 	}
 
-	// every frame with its own palette, cut to the colours it uses; the screen's palette and background go with them
+	// every frame with its own palette, cut to the colours it uses; frame offsets, timing and disposal stay. The
+	// screen keeps its size, and its palette shrinks to the one colour it is asked for: the background.
+	var background color.Palette
+	if screen, ok := g.Config.ColorModel.(color.Palette); ok && int(g.BackgroundIndex) < len(screen) {
+		background = color.Palette{screen[g.BackgroundIndex]}
+	}
+
 	for i, f := range g.Image {
 		g.Image[i] = compact(f)
 	}
 
-	g.Config, g.BackgroundIndex = image.Config{}, 0
+	g.Config.ColorModel, g.BackgroundIndex = nil, 0
+	if background != nil {
+		g.Config.ColorModel = background
+	}
 
 	var buf bytes.Buffer
 	if err := gif.EncodeAll(&buf, g); err != nil {

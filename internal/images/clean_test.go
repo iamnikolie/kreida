@@ -669,3 +669,98 @@ func TestUnusedBytesInsideAStreamDoNotRideOut(t *testing.T) {
 	require.NoError(t, err, "the decoder skips it")
 	assert.NotContains(t, string(clean(t, webpIn).Bytes), "private-unused")
 }
+
+// ----- third review
+
+func TestAGIFKeepsItsLookWithOnlyTheColoursItUses(t *testing.T) {
+	// 4×2 frames, all index 0, the rest of each palette spelling text; a canvas larger than the frames, offsets,
+	// disposal, timing and a background colour on the screen's palette
+	spell := func(s string) color.Palette {
+		pal := color.Palette{color.NRGBA{10, 20, 30, 255}}
+		for i := 0; i+2 < len(s); i += 3 {
+			pal = append(pal, color.NRGBA{s[i], s[i+1], s[i+2], 255})
+		}
+
+		return pal
+	}
+
+	screen := spell("private-global-palette-text!")
+	screen[0] = color.NRGBA{200, 100, 50, 255}
+
+	first := image.NewPaletted(image.Rect(0, 0, 4, 2), spell("private-local-one-text!!"))
+	second := image.NewPaletted(image.Rect(3, 4, 7, 6), spell("private-local-two-text!!"))
+	second.Pix[5] = 1
+
+	var raw bytes.Buffer
+	require.NoError(t, gif.EncodeAll(&raw, &gif.GIF{
+		Image: []*image.Paletted{first, second}, Delay: []int{7, 9}, LoopCount: 2,
+		Disposal: []byte{gif.DisposalBackground, gif.DisposalPrevious},
+		Config:   image.Config{ColorModel: screen, Width: 10, Height: 8}, BackgroundIndex: 0,
+	}))
+	require.Contains(t, raw.String(), "private")
+
+	c := clean(t, raw.Bytes())
+	assert.NotContains(t, string(c.Bytes), "private")
+	assert.NotContains(t, string(c.Bytes), "text")
+	assert.Equal(t, 10, c.W)
+	assert.Equal(t, 8, c.H)
+
+	in, err := gif.DecodeAll(bytes.NewReader(raw.Bytes()))
+	require.NoError(t, err)
+
+	out, err := gif.DecodeAll(bytes.NewReader(c.Bytes))
+	require.NoError(t, err)
+
+	assert.Equal(t, in.Config.Width, out.Config.Width)
+	assert.Equal(t, in.Config.Height, out.Config.Height)
+	assert.Equal(t, in.Delay, out.Delay)
+	assert.Equal(t, in.Disposal, out.Disposal)
+	assert.Equal(t, in.LoopCount, out.LoopCount)
+	assert.Equal(t, color.NRGBAModel.Convert(screen[0]), color.NRGBAModel.Convert(out.Config.ColorModel.(color.Palette)[out.BackgroundIndex]), "the background colour")
+
+	require.Len(t, out.Image, 2)
+
+	for i := range in.Image {
+		assert.Equal(t, in.Image[i].Bounds(), out.Image[i].Bounds(), "frame %d offset", i)
+
+		b := in.Image[i].Bounds()
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			for x := b.Min.X; x < b.Max.X; x++ {
+				assert.Equal(t, color.NRGBAModel.Convert(in.Image[i].At(x, y)), color.NRGBAModel.Convert(out.Image[i].At(x, y)), "frame %d at %d,%d", i, x, y)
+			}
+		}
+	}
+
+	// a GIF table holds at least two colours: a one-colour frame is padded with black, which says nothing
+	assert.Len(t, out.Image[0].Palette, 2)
+	assert.Equal(t, color.NRGBAModel.Convert(color.Black), color.NRGBAModel.Convert(out.Image[0].Palette[1]))
+	assert.Len(t, out.Image[1].Palette, 2)
+}
+
+func TestAPNGWithAPaletteKeepsItsLookWithOnlyTheColoursItUses(t *testing.T) {
+	pal := color.Palette{color.NRGBA{10, 20, 30, 255}, color.NRGBA{40, 50, 60, 128}}
+	for _, ch := range []byte("private-unused-entries") {
+		pal = append(pal, color.NRGBA{ch, ch, ch, 255})
+	}
+
+	img := image.NewPaletted(image.Rect(0, 0, 4, 2), pal)
+	img.Pix[6] = 1
+
+	var raw bytes.Buffer
+	require.NoError(t, png.Encode(&raw, img))
+	require.Contains(t, raw.String(), "ppprrriii")
+
+	c := clean(t, raw.Bytes())
+	assert.NotContains(t, string(c.Bytes), "ppprrriii")
+
+	out, err := png.Decode(bytes.NewReader(c.Bytes))
+	require.NoError(t, err)
+	require.IsType(t, &image.Paletted{}, out)
+	assert.Len(t, out.(*image.Paletted).Palette, 2)
+
+	for y := range 2 {
+		for x := range 4 {
+			assert.Equal(t, color.NRGBAModel.Convert(img.At(x, y)), color.NRGBAModel.Convert(out.At(x, y)))
+		}
+	}
+}
