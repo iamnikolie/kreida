@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"math"
 	"slices"
+	"strings"
 )
 
 // No byte of a picture's own colour profile leaves the machine. A profile is read for its colour only: if its
@@ -64,7 +65,7 @@ func init() {
 // knownICC names the standard a profile is, by its colour, and answers kreida's copy of it; nil when it is none.
 func knownICC(p []byte) []byte {
 	tags := readICC(p)
-	if tags == nil {
+	if tags == nil || !pure(p, tags) {
 		return nil
 	}
 
@@ -76,6 +77,28 @@ func knownICC(p []byte) []byte {
 	}
 
 	return nil
+}
+
+// d50 is the PCS illuminant every matrix profile is relative to.
+var d50 = [3]float64{0.9642, 1, 0.8249}
+
+// pure says whether a profile's colour is its matrix and tone curves alone, so that matching those is matching the
+// profile: a display profile of version 4 or older, relative to D50, without any tag a CMM would take over the matrix
+// — a table or multi-process transform (A2B0…, B2A0…, D2B0…, B2D0…) or coding-independent code points (cicp). Other
+// tags (names, copyright, white point, private ones) do not change how its pixels look under a perceptual or relative
+// intent.
+func pure(p []byte, tags map[string][]byte) bool {
+	if p[8] > 4 || string(p[12:16]) != "mntr" || !near(slices.Concat([]byte("XYZ \x00\x00\x00\x00"), p[68:80]), d50) {
+		return false
+	}
+
+	for sig := range tags {
+		if sig == "cicp" || sig[1] == '2' && strings.ContainsRune("ABDM", rune(sig[0])) && strings.ContainsRune("ABDM", rune(sig[2])) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // readICC finds the matrix and tone curves of an RGB display profile. Nil when it is not one, or cannot be read.
@@ -258,7 +281,7 @@ func buildICC(k *knownProfile) []byte {
 		body []byte
 	}{
 		{"desc", desc}, {"cprt", []byte("text\x00\x00\x00\x00No copyright, use freely\x00")},
-		{"wtpt", xyz([3]float64{0.9642, 1, 0.8249})},
+		{"wtpt", xyz(d50)},
 		{"rXYZ", xyz(k.r)}, {"gXYZ", xyz(k.g)}, {"bXYZ", xyz(k.b)},
 		{"rTRC", curve}, {"gTRC", curve}, {"bTRC", curve}, {"chad", chad},
 	}

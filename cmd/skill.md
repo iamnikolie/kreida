@@ -253,7 +253,8 @@ after the picture, in all four formats: every picture is decoded whole and writt
 the original file goes out. A JPEG is saved again at quality 92; a PNG and a GIF losslessly (an animated PNG becomes its
 first image, a GIF keeps its frames, palettes cut to the colours used); a WebP becomes a PNG (lossless or with alpha)
 or a JPEG (lossy). No byte of a colour profile goes out: an sRGB, Display P3 or Adobe RGB profile, recognised by its
-colour, is replaced by kreida's own copy; any other profile is dropped and stderr says the colours may shift (save the
+colour, is replaced by kreida's own copy; a profile that also carries a table or other transform that would override
+its matrix is not taken for a standard; any other profile is dropped and stderr says the colours may shift (save the
 picture as sRGB to avoid it). A photo that EXIF turns is turned in its pixels first. Refused, never sent as is: a file
 that cannot be read or whose pixels do not decode, and an animated WebP. Your own editor and `kreida png` show the file as
 it is. An export or a publish still carries the picture of any image the board names, so check where a board's paths

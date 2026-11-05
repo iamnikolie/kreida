@@ -764,3 +764,131 @@ func TestAPNGWithAPaletteKeepsItsLookWithOnlyTheColoursItUses(t *testing.T) {
 		}
 	}
 }
+
+// ----- fourth review
+
+// withTag adds a tag to a profile: one more entry in its table, the body at its end.
+func withTag(p []byte, sig string, body []byte) []byte {
+	n := int(binary.BigEndian.Uint32(p[128:]))
+	table := 128 + 4 + 12*n
+
+	out := slices.Concat(p[:table], make([]byte, 12), p[table:])
+	for i := range n {
+		e := 128 + 4 + 12*i
+		binary.BigEndian.PutUint32(out[e+4:], binary.BigEndian.Uint32(out[e+4:])+12)
+	}
+
+	for len(out)%4 != 0 {
+		out = append(out, 0)
+	}
+
+	copy(out[table:], sig)
+	binary.BigEndian.PutUint32(out[table+4:], uint32(len(out)))
+	binary.BigEndian.PutUint32(out[table+8:], uint32(len(body)))
+	binary.BigEndian.PutUint32(out[128:], uint32(n+1))
+
+	out = append(out, body...)
+	binary.BigEndian.PutUint32(out, uint32(len(out)))
+
+	return out
+}
+
+// lut8 is a valid three-channel mft1 transform: identity matrix and tables, two grid points, every grid point black.
+func lut8() []byte {
+	b := slices.Concat([]byte("mft1\x00\x00\x00\x00"), []byte{3, 3, 2, 0})
+	for i := range 9 {
+		v := uint32(0)
+		if i%4 == 0 {
+			v = 1 << 16
+		}
+
+		b = binary.BigEndian.AppendUint32(b, v)
+	}
+
+	ramp := make([]byte, 256)
+	for i := range ramp {
+		ramp[i] = byte(i)
+	}
+
+	for range 3 {
+		b = append(b, ramp...)
+	}
+
+	b = append(b, make([]byte, 8*3)...)
+
+	for range 3 {
+		b = append(b, ramp...)
+	}
+
+	return b
+}
+
+func TestAProfileWhoseColourIsNotItsMatrixIsNotTakenForAStandard(t *testing.T) {
+	rgb := fixture(t, "rgb.icc")
+	require.Equal(t, 1608, len(lut8()))
+
+	header := func(at int, b string) []byte {
+		p := append([]byte{}, rgb...)
+		copy(p[at:], b)
+
+		return p
+	}
+
+	for name, profile := range map[string][]byte{
+		// the matrix and curves of sRGB, with a table that turns red black: a CMM uses the table
+		"A2B0 table":         withTag(rgb, "A2B0", lut8()),
+		"B2A0 table":         withTag(rgb, "B2A0", lut8()),
+		"D2B0 multi-process": withTag(rgb, "D2B0", []byte("mpet\x00\x00\x00\x00\x00\x03\x00\x03\x00\x00\x00\x00")),
+		"code points":        withTag(rgb, "cicp", []byte("cicp\x00\x00\x00\x00\x09\x10\x00\x01")),
+		"not a display":      header(12, "scnr"),
+		"a later version":    header(8, "\x05"),
+		"another illuminant": header(68, "\x00\x00\xf3\x51\x00\x01\x00\x00\x00\x01\x16\xcc"),
+	} {
+		c := clean(t, withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), profile))
+		assert.NotContains(t, string(c.Bytes), "ICC_PROFILE", name)
+		assert.Contains(t, c.Note, "colours may shift", name)
+	}
+
+	// the same profile with only names and private tags added is still sRGB
+	plain := clean(t, withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), withTag(rgb, "zzzz", []byte("zzzz\x00\x00\x00\x00private"))))
+	assertOurProfile(t, iccOf(t, plain), "sRGB")
+	assert.Empty(t, plain.Note)
+}
+
+func TestAGIFWhoseFirstFrameIsSmallerThanItsCanvasIsKept(t *testing.T) {
+	pal := color.Palette{color.Black, color.White}
+	first, second := image.NewPaletted(image.Rect(0, 0, 2, 2), pal), image.NewPaletted(image.Rect(2, 2, 4, 4), pal)
+	second.Pix[1] = 1
+
+	in := &gif.GIF{
+		Image: []*image.Paletted{first, second}, Delay: []int{5, 10}, LoopCount: 0,
+		Disposal: []byte{gif.DisposalNone, gif.DisposalBackground},
+		Config:   image.Config{Width: 4, Height: 4, ColorModel: pal},
+	}
+
+	var raw bytes.Buffer
+	require.NoError(t, gif.EncodeAll(&raw, in))
+
+	c := clean(t, raw.Bytes())
+	assert.Equal(t, 4, c.W)
+	assert.Equal(t, 4, c.H)
+
+	out, err := gif.DecodeAll(bytes.NewReader(c.Bytes))
+	require.NoError(t, err)
+	assert.Equal(t, 4, out.Config.Width)
+	assert.Equal(t, 4, out.Config.Height)
+	assert.Equal(t, in.Delay, out.Delay)
+	assert.Equal(t, in.Disposal, out.Disposal)
+	assert.Equal(t, in.LoopCount, out.LoopCount)
+	require.Len(t, out.Image, 2)
+
+	for i, f := range in.Image {
+		assert.Equal(t, f.Bounds(), out.Image[i].Bounds(), "frame %d offset", i)
+
+		for y := f.Rect.Min.Y; y < f.Rect.Max.Y; y++ {
+			for x := f.Rect.Min.X; x < f.Rect.Max.X; x++ {
+				assert.Equal(t, color.NRGBAModel.Convert(f.At(x, y)), color.NRGBAModel.Convert(out.Image[i].At(x, y)), "frame %d at %d,%d", i, x, y)
+			}
+		}
+	}
+}

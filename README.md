@@ -67,7 +67,9 @@ losslessly, and an animated PNG becomes its first frame. WebP becomes PNG when
 it is lossless or has alpha, and JPEG otherwise. Palettes keep only the colours
 in use. No byte of a colour profile goes out: an sRGB, Display P3, or Adobe RGB
 profile, recognised by its colour data, is replaced with kreida's own copy, and
-any other profile is dropped with a warning that colours may shift. A photo
+any other profile is dropped with a warning that colours may shift. Only a pure
+matrix profile counts as a standard: one that also carries a lookup table or
+another transform that overrides its matrix is treated as unknown. A photo
 rotated by its EXIF orientation is rotated in its pixels first, so it keeps the
 same appearance.
 
