@@ -1,129 +1,223 @@
 package images
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"slices"
 )
 
-// iccColourTypes are the ICC tag types that describe colour: curves, matrices, lookup tables, chromaticities. Every
-// other type (text, descriptions, dictionaries, names, private types) is dropped from a profile that leaves the
-// machine.
-var iccColourTypes = map[string]bool{
-	"curv": true, "para": true, "XYZ ": true, "sf32": true, "mft1": true, "mft2": true, "mAB ": true, "mBA ": true,
-	"mpet": true, "chrm": true, "cicp": true,
-}
+// errProfile is a colour profile that cannot go out clean: unreadable, or not one kreida can rebuild.
+var errProfile = errors.New("its colour profile is not one kreida can carry; save the picture as sRGB")
 
 const (
 	iccHeader  = 128
 	iccMaxTags = 100
+	iccMaxCurv = 4096
 )
 
-// cleanICC keeps the colour of an ICC profile and none of its words. The description and the copyright become "ICC",
-// tags of any type but colour data go, and the header loses the fields that name a vendor, a device, a creator, a
-// date or the profile's own hash. The answer is the profile and its colour space ("RGB ", "GRAY", "CMYK", ...). A
-// profile that cannot be read is refused.
-func cleanICC(p []byte) ([]byte, string, error) {
-	bad := errors.New("unreadable colour profile")
+// iccOrder is every tag a profile that leaves the machine may have after desc and cprt, in the order it is written,
+// with the types it may have. A matrix/TRC profile is all a display needs; lookup tables, names, text, dictionaries and
+// private tags are not carried.
+var iccOrder = []struct {
+	sig   string
+	types []string
+}{
+	{"wtpt", []string{"XYZ "}}, {"bkpt", []string{"XYZ "}},
+	{"rXYZ", []string{"XYZ "}}, {"gXYZ", []string{"XYZ "}}, {"bXYZ", []string{"XYZ "}},
+	{"rTRC", []string{"curv", "para"}}, {"gTRC", []string{"curv", "para"}}, {"bTRC", []string{"curv", "para"}},
+	{"kTRC", []string{"curv", "para"}},
+	{"chad", []string{"sf32"}}, {"cicp", []string{"cicp"}},
+}
 
-	if len(p) < iccHeader+4 || string(p[36:40]) != "acsp" {
-		return nil, "", bad
+// paraParams is how many parameters each parametric curve function has.
+var paraParams = map[uint16]int{0: 1, 1: 3, 2: 4, 3: 5, 4: 7}
+
+// cleanICC rebuilds an ICC profile from what it says about colour, and nothing else. Every tag kept is parsed and
+// written again in its canonical form: reserved bytes zero, nothing after its numbers. The description and copyright
+// say "ICC"; the header keeps only the version, class, colour space, rendering intent and the standard D50 illuminant.
+// It carries matrix/TRC profiles (RGB) and TRC profiles (grey); anything else, and anything it cannot read, is
+// refused. It answers the profile and its colour space ("RGB " or "GRAY").
+func cleanICC(p []byte) ([]byte, string, error) {
+	if len(p) < iccHeader+4 || string(p[36:40]) != "acsp" || string(p[20:24]) != "XYZ " {
+		return nil, "", errProfile
 	}
 
 	size := int(binary.BigEndian.Uint32(p))
 	if size < iccHeader+4 || size > len(p) {
-		return nil, "", bad
+		return nil, "", errProfile
 	}
 
 	p = p[:size]
-	v4 := p[8] >= 4
+
+	space := string(p[16:20])
+	if space != "RGB " && space != "GRAY" {
+		return nil, "", errProfile
+	}
+
+	if class := string(p[12:16]); class != "mntr" && class != "scnr" && class != "spac" {
+		return nil, "", errProfile
+	}
 
 	n := int(binary.BigEndian.Uint32(p[iccHeader:]))
 	if n > iccMaxTags || iccHeader+4+12*n > size {
-		return nil, "", bad
+		return nil, "", errProfile
 	}
 
-	type tag struct {
-		sig       string
-		off, size int
-	}
-
-	var keep []tag
+	bodies := map[string][]byte{}
+	seen := map[string]bool{}
 
 	for i := range n {
 		e := p[iccHeader+4+12*i:]
-		t := tag{string(e[:4]), int(binary.BigEndian.Uint32(e[4:])), int(binary.BigEndian.Uint32(e[8:]))}
+		sig, off, length := string(e[:4]), int(binary.BigEndian.Uint32(e[4:])), int(binary.BigEndian.Uint32(e[8:]))
 
-		if t.off < iccHeader+4+12*n || t.size < 8 || t.off > size-t.size {
-			return nil, "", bad
+		if seen[sig] || off < iccHeader+4+12*n || length < 8 || off > size-length {
+			return nil, "", errProfile
 		}
 
-		if t.sig != "desc" && t.sig != "cprt" && iccColourTypes[string(p[t.off:t.off+4])] {
-			keep = append(keep, t)
+		seen[sig] = true
+
+		at := slices.IndexFunc(iccOrder, func(t struct {
+			sig   string
+			types []string
+		}) bool {
+			return t.sig == sig
+		})
+		if at < 0 {
+			continue
+		}
+
+		data := p[off : off+length]
+		if !slices.Contains(iccOrder[at].types, string(data[:4])) {
+			return nil, "", errProfile
+		}
+
+		body, err := iccBody(data)
+		if err != nil {
+			return nil, "", err
+		}
+
+		bodies[sig] = body
+	}
+
+	need := []string{"wtpt", "kTRC"}
+	if space == "RGB " {
+		need = []string{"wtpt", "rXYZ", "gXYZ", "bXYZ", "rTRC", "gTRC", "bTRC"}
+	}
+
+	for _, sig := range need {
+		if bodies[sig] == nil {
+			return nil, "", errProfile
 		}
 	}
 
-	head := append([]byte{}, p[:iccHeader]...)
+	v4 := p[8] >= 4
 
-	for _, r := range [][2]int{{4, 8}, {24, 36}, {40, 44}, {48, 64}, {80, 128}} {
-		clear(head[r[0]:r[1]])
+	sigs := []string{"desc", "cprt"}
+	bodies["desc"], bodies["cprt"] = iccText(v4, true), iccText(v4, false)
+
+	for _, t := range iccOrder {
+		if bodies[t.sig] != nil {
+			sigs = append(sigs, t.sig)
+		}
 	}
 
-	text, desc := iccText(v4, false), iccText(v4, true)
+	head := make([]byte, iccHeader)
+	copy(head[8:10], p[8:10])
+	copy(head[12:24], p[12:24])
+	copy(head[36:40], "acsp")
 
-	sigs := make([]string, 0, len(keep)+2)
-	sigs = append(sigs, "desc", "cprt")
-
-	for _, t := range keep {
-		sigs = append(sigs, t.sig)
+	if intent := binary.BigEndian.Uint32(p[64:]); intent <= 3 {
+		binary.BigEndian.PutUint32(head[64:], intent)
 	}
 
-	// shared data (one curve for three channels) stays shared
+	copy(head[68:80], []byte{0, 0, 0xf6, 0xd6, 0, 1, 0, 0, 0, 0, 0xd3, 0x2d})
+
+	// the same body twice (one curve for three channels) is written once
 	table := iccHeader + 4 + 12*len(sigs)
-	data := []byte{}
-	where := map[[2]int]int{}
-	entries := make([][3]int, 0, len(sigs))
+	var data []byte
 
-	put := func(b []byte) int {
-		for len(data)%4 != 0 {
-			data = append(data, 0)
+	entries := make([]byte, 0, 12*len(sigs))
+
+	for _, sig := range sigs {
+		body := bodies[sig]
+
+		off := bytes.Index(data, body)
+		if off < 0 || off%4 != 0 {
+			for len(data)%4 != 0 {
+				data = append(data, 0)
+			}
+
+			off = len(data)
+			data = append(data, body...)
 		}
 
-		off := table + len(data)
-		data = append(data, b...)
-
-		return off
-	}
-
-	entries = append(entries, [3]int{put(desc), len(desc)}, [3]int{put(text), len(text)})
-
-	for _, t := range keep {
-		k := [2]int{t.off, t.size}
-
-		off, ok := where[k]
-		if !ok {
-			off = put(p[t.off : t.off+t.size])
-			where[k] = off
-		}
-
-		entries = append(entries, [3]int{off, t.size})
+		entries = append(entries, sig...)
+		entries = binary.BigEndian.AppendUint32(entries, uint32(table+off))
+		entries = binary.BigEndian.AppendUint32(entries, uint32(len(body)))
 	}
 
 	for len(data)%4 != 0 {
 		data = append(data, 0)
 	}
 
-	out := slices.Concat(head, binary.BigEndian.AppendUint32(nil, uint32(len(sigs))))
-	for i, s := range sigs {
-		out = append(out, s...)
-		out = binary.BigEndian.AppendUint32(out, uint32(entries[i][0]))
-		out = binary.BigEndian.AppendUint32(out, uint32(entries[i][1]))
-	}
-
-	out = append(out, data...)
+	out := slices.Concat(head, binary.BigEndian.AppendUint32(nil, uint32(len(sigs))), entries, data)
 	binary.BigEndian.PutUint32(out, uint32(len(out)))
 
-	return out, string(p[16:20]), nil
+	return out, space, nil
+}
+
+// iccBody writes a colour tag again from its numbers: its type, four zero bytes, then exactly what the type holds.
+func iccBody(d []byte) ([]byte, error) {
+	typ := string(d[:4])
+	out := append([]byte(typ), 0, 0, 0, 0)
+
+	switch typ {
+	case "XYZ ":
+		if len(d) < 20 {
+			return nil, errProfile
+		}
+
+		return append(out, d[8:20]...), nil
+	case "sf32":
+		if len(d) < 44 {
+			return nil, errProfile
+		}
+
+		return append(out, d[8:44]...), nil
+	case "cicp":
+		if len(d) < 12 {
+			return nil, errProfile
+		}
+
+		return append(out, d[8:12]...), nil
+	case "curv":
+		if len(d) < 12 {
+			return nil, errProfile
+		}
+
+		n := int(binary.BigEndian.Uint32(d[8:]))
+		if n > iccMaxCurv || len(d) < 12+2*n {
+			return nil, errProfile
+		}
+
+		return slices.Concat(out, d[8:12+2*n]), nil
+	case "para":
+		if len(d) < 12 {
+			return nil, errProfile
+		}
+
+		fn := binary.BigEndian.Uint16(d[8:])
+
+		k, ok := paraParams[fn]
+		if !ok || len(d) < 12+4*k {
+			return nil, errProfile
+		}
+
+		return slices.Concat(out, d[8:10], []byte{0, 0}, d[12:12+4*k]), nil
+	}
+
+	return nil, errProfile
 }
 
 // iccText is the text "ICC" as a profile of that version writes a description (desc) or a copyright.

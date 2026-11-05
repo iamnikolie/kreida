@@ -28,12 +28,13 @@ const jpegQuality = 92
 // cacheBytes bounds the memory of the cleaned images kept for the next request.
 const cacheBytes = 64 << 20
 
-// Clean returns an image as it may leave this machine: no EXIF, XMP, IPTC, comments, text chunks or bytes after the
-// end of the picture, whatever the format. Only what draws the picture is kept, and its colour, with the words taken
-// out of a colour profile (see cleanICC). Every picture is decoded whole before it may go. A photo that stands upright
-// through its EXIF orientation is turned in its pixels first, so it does not fall over when the orientation goes. The
-// result says what it is: its own hash, type and pixel size. It fails closed: a file it cannot take apart, or whose
-// pixels do not decode, is refused, and its bytes never go anywhere. The same file always comes out as the same bytes.
+// Clean returns an image as it may leave this machine: its pixels, decoded whole and written again by Go's encoders
+// (JPEG at quality 92, PNG and GIF losslessly, a WebP as a PNG or a JPEG), and its colour, as a profile rebuilt from
+// its numbers (see cleanICC). No byte of the original stream goes along, so no EXIF, XMP, IPTC, comment, text chunk or
+// unused byte anywhere in the file can. A photo that stands upright through its EXIF orientation is turned in its
+// pixels first, so it does not fall over when the orientation goes. The result says what it is: its own hash, type and
+// pixel size. It fails closed: a file it cannot take apart, or whose pixels do not decode, is refused, and its bytes
+// never go anywhere. The same file always comes out as the same bytes.
 func Clean(f File) (File, error) {
 	cache.Lock()
 	r, ok := cache.m[f.SHA256]
@@ -84,7 +85,7 @@ func clean(f File) (File, error) {
 	case "image/gif":
 		out, err = cleanGIF(f.Bytes)
 	case "image/webp":
-		out, err = cleanWebP(f.Bytes)
+		out, orient, err = cleanWebP(f.Bytes, f.W, f.H)
 	default:
 		err = errors.New("unknown type")
 	}
@@ -100,7 +101,10 @@ func clean(f File) (File, error) {
 		wantW, wantH = f.H, f.W
 	}
 
-	if err != nil || typ != f.Type || w != wantW || h != wantH {
+	// a WebP goes out as a PNG or a JPEG: there is no WebP encoder here
+	sameType := typ == f.Type || f.Type == "image/webp" && (typ == "image/png" || typ == "image/jpeg")
+
+	if err != nil || !sameType || w != wantW || h != wantH {
 		return File{}, refuse(Unsupported, "cannot strip its metadata: the result does not read as the same picture")
 	}
 
@@ -113,27 +117,95 @@ func clean(f File) (File, error) {
 	return File{Image: board.Image{SHA256: hex.EncodeToString(sum[:]), Type: typ, W: w, H: h}, Bytes: out}, nil
 }
 
-var errPixels = errors.New("its pixels do not decode")
+var (
+	errPixels = errors.New("its pixels do not decode")
+	errFit    = errors.New("its colour profile does not fit its pixels")
+	errCMYK   = errors.New("a CMYK picture with a colour profile; save it as RGB")
+)
 
-// errTurned is a picture that EXIF turns and whose colour cannot follow it into the turned pixels.
-var errTurned = errors.New("its EXIF turns it and its colour profile cannot follow; save the picture upright")
+// Every picture leaves as the encoder writes it from its decoded pixels: no byte of the original stream goes along, so
+// nothing a decoder skips (a trailer in a scan, a chunk's tail) can ride out with it. Only its colour is carried over,
+// as a profile rebuilt by cleanICC and, for a PNG, its sRGB, gamma and chromaticity chunks.
+
+// encodeJPEG writes the pixels as a JPEG with the profile, if any, after SOI.
+func encodeJPEG(img image.Image, profile []byte, space string) ([]byte, error) {
+	if profile != nil {
+		_, gray := img.(*image.Gray)
+		if gray != (space == "GRAY") {
+			return nil, errFit
+		}
+	}
+
+	// a JPEG has no alpha: the NRGBA bytes of an opaque picture are its RGBA bytes, which the encoder takes fastest
+	if n, ok := img.(*image.NRGBA); ok {
+		img = &image.RGBA{Pix: n.Pix, Stride: n.Stride, Rect: n.Rect}
+	}
+
+	var buf bytes.Buffer
+	if err := jpeg.Encode(&buf, img, &jpeg.Options{Quality: jpegQuality}); err != nil {
+		return nil, err
+	}
+
+	out := buf.Bytes()
+	if profile == nil {
+		return out, nil
+	}
+
+	// a rebuilt profile is a few kilobytes: one APP2 segment
+	if len(profile) > 65535-2-len(iccID)-2 {
+		return nil, errProfile
+	}
+
+	return slices.Concat(out[:2], segment(0xe2, slices.Concat(iccID, []byte{1, 1}, profile)), out[2:]), nil
+}
+
+// encodePNG writes the pixels as a PNG with the colour chunks and the profile, if any, right after IHDR.
+func encodePNG(img image.Image, colour, profile []byte, space string) ([]byte, error) {
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, img); err != nil {
+		return nil, err
+	}
+
+	out := buf.Bytes()
+
+	if profile != nil {
+		want := "RGB "
+		if ct := out[25]; ct == 0 || ct == 4 {
+			want = "GRAY"
+		}
+
+		if space != want {
+			return nil, errFit
+		}
+
+		var z bytes.Buffer
+
+		zw, _ := zlib.NewWriterLevel(&z, zlib.BestCompression)
+		_, _ = zw.Write(profile)
+		_ = zw.Close()
+
+		colour = slices.Concat(colour, pngChunk("iCCP", append([]byte("ICC Profile\x00\x00"), z.Bytes()...)))
+	}
+
+	// signature 8, IHDR 25: the colour goes before any palette or data
+	return slices.Concat(out[:33], colour, out[33:]), nil
+}
+
+func segment(marker byte, body []byte) []byte {
+	return append([]byte{0xff, marker, byte((len(body) + 2) >> 8), byte(len(body) + 2)}, body...)
+}
 
 // ----- JPEG
 
 var (
-	exifID  = []byte("Exif\x00\x00")
-	iccID   = []byte("ICC_PROFILE\x00")
-	adobeID = []byte("Adobe")
+	exifID = []byte("Exif\x00\x00")
+	iccID  = []byte("ICC_PROFILE\x00")
 )
 
-// iccChunk is the most profile bytes one APP2 segment holds: 65535 less the length, the name and the two counters.
-const iccChunk = 65535 - 2 - len("ICC_PROFILE\x00") - 2
-
-// cleanJPEG strips a JPEG (see stripJPEG), decodes it whole to make sure it is a picture, turns it upright when its
-// EXIF says so, and puts its colour profile back, cleaned (see cleanICC). The pixels of an upright JPEG are not
-// touched: its scans go out as they came.
+// cleanJPEG decodes a JPEG, turns it upright when its EXIF says so and writes it again at quality 92, with its colour
+// profile rebuilt.
 func cleanJPEG(d []byte) ([]byte, int, error) {
-	out, orient, icc, err := stripJPEG(d)
+	orient, icc, err := readJPEG(d)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -148,72 +220,33 @@ func cleanJPEG(d []byte) ([]byte, int, error) {
 		}
 	}
 
-	src, err := jpeg.Decode(bytes.NewReader(out))
+	src, err := jpeg.Decode(bytes.NewReader(d))
 	if err != nil {
 		return nil, 0, errPixels
 	}
 
-	if orient != 1 {
-		if _, gray := src.(*image.Gray); profile != nil && (space != "RGB " || gray) {
-			return nil, 0, errTurned
-		}
-
-		if _, cmyk := src.(*image.CMYK); cmyk {
-			return nil, 0, errTurned
-		}
-
-		up := upright(src, orient)
-
-		var buf bytes.Buffer
-
-		// a JPEG has no alpha: every pixel is opaque, so its NRGBA bytes are its RGBA bytes
-		if err := jpeg.Encode(&buf, &image.RGBA{Pix: up.Pix, Stride: up.Stride, Rect: up.Rect}, &jpeg.Options{Quality: jpegQuality}); err != nil {
-			return nil, 0, err
-		}
-
-		out = buf.Bytes()
+	if _, cmyk := src.(*image.CMYK); cmyk && profile != nil {
+		return nil, 0, errCMYK
 	}
 
-	if profile == nil {
-		return out, orient, nil
-	}
+	out, err := encodeJPEG(upright(src, orient), profile, space)
 
-	// the profile goes right after SOI, in as many APP2 segments as it takes
-	count := (len(profile) + iccChunk - 1) / iccChunk
-	if count > 255 {
-		return nil, 0, errors.New("colour profile too large")
-	}
-
-	with := []byte{0xff, 0xd8}
-
-	for i := range count {
-		part := profile[i*iccChunk : min((i+1)*iccChunk, len(profile))]
-		with = append(with, segment(0xe2, slices.Concat(iccID, []byte{byte(i + 1), byte(count)}, part))...)
-	}
-
-	return append(with, out[2:]...), orient, nil
+	return out, orient, err
 }
 
-func segment(marker byte, body []byte) []byte {
-	return append([]byte{0xff, marker, byte((len(body) + 2) >> 8), byte(len(body) + 2)}, body...)
-}
-
-// stripJPEG keeps the segments that draw the picture (tables, frame, scans) and Adobe's colour transform in its
-// standard 12 bytes, and drops every other APPn (EXIF, XMP, IPTC, thumbnails, the ICC profile, which comes back
-// cleaned), comments and whatever follows the end marker. It answers the EXIF orientation and the ICC profile as one
-// piece. A marker it does not know fails it.
-func stripJPEG(d []byte) ([]byte, int, []byte, error) {
+// readJPEG walks a JPEG's segments up to its end marker and answers its EXIF orientation and its ICC profile in one
+// piece. A marker it does not know, a segment that runs past the end or a profile with a missing piece fails it.
+func readJPEG(d []byte) (int, []byte, error) {
 	if len(d) < 4 || d[0] != 0xff || d[1] != 0xd8 {
-		return nil, 0, nil, errors.New("not a JPEG")
+		return 0, nil, errors.New("not a JPEG")
 	}
 
-	out := []byte{0xff, 0xd8}
 	orient, exif := 1, false
 	icc, iccCount := map[int][]byte{}, 0
 
 	for i := 2; ; {
 		if i >= len(d) || d[i] != 0xff {
-			return nil, 0, nil, errors.New("JPEG has no marker where one belongs, or ends before its end")
+			return 0, nil, errors.New("JPEG has no marker where one belongs, or ends before its end")
 		}
 
 		for i < len(d) && d[i] == 0xff {
@@ -221,7 +254,7 @@ func stripJPEG(d []byte) ([]byte, int, []byte, error) {
 		}
 
 		if i >= len(d) {
-			return nil, 0, nil, errors.New("JPEG ends before its end marker")
+			return 0, nil, errors.New("JPEG ends before its end marker")
 		}
 
 		m := d[i]
@@ -230,27 +263,22 @@ func stripJPEG(d []byte) ([]byte, int, []byte, error) {
 		switch {
 		case m == 0xd9:
 			profile, err := joinICC(icc, iccCount)
-			if err != nil {
-				return nil, 0, nil, err
-			}
 
-			return append(out, 0xff, 0xd9), orient, profile, nil
+			return orient, profile, err
 		case m >= 0xd0 && m <= 0xd7 || m == 0x01:
-			out = append(out, 0xff, m)
-
 			continue
 		}
 
 		if i+2 > len(d) {
-			return nil, 0, nil, errors.New("JPEG ends inside a segment")
+			return 0, nil, errors.New("JPEG ends inside a segment")
 		}
 
 		n := int(binary.BigEndian.Uint16(d[i:]))
 		if n < 2 || i+n > len(d) {
-			return nil, 0, nil, errors.New("JPEG segment runs past the end")
+			return 0, nil, errors.New("JPEG segment runs past the end")
 		}
 
-		seg, body := d[i:i+n], d[i+2:i+n]
+		body := d[i+2 : i+n]
 
 		switch {
 		case m == 0xe1 && bytes.HasPrefix(body, exifID):
@@ -260,42 +288,27 @@ func stripJPEG(d []byte) ([]byte, int, []byte, error) {
 		case m == 0xe2 && bytes.HasPrefix(body, iccID):
 			rest := body[len(iccID):]
 			if len(rest) < 2 || rest[0] == 0 || rest[1] == 0 || iccCount != 0 && int(rest[1]) != iccCount || icc[int(rest[0])] != nil {
-				return nil, 0, nil, errors.New("JPEG colour profile segments do not add up")
+				return 0, nil, errors.New("JPEG colour profile segments do not add up")
 			}
 
 			iccCount = int(rest[1])
 			icc[int(rest[0])] = rest[2:]
-		case m == 0xee && bytes.HasPrefix(body, adobeID):
-			// "Adobe", version, two flag words and the transform: nothing past them
-			if len(body) < 12 {
-				return nil, 0, nil, errors.New("JPEG Adobe segment too short")
-			}
-
-			out = append(out, segment(0xee, body[:12])...)
 		case m >= 0xe0 && m <= 0xef, m == 0xfe:
 		case m == 0xda:
-			out = append(out, 0xff, m)
-			out = append(out, seg...)
 			i += n
 
-			j := i
-			for j+1 < len(d) && (d[j] != 0xff || d[j+1] == 0 || d[j+1] >= 0xd0 && d[j+1] <= 0xd7) {
-				if d[j] == 0xff {
-					j++
+			for i+1 < len(d) && (d[i] != 0xff || d[i+1] == 0 || d[i+1] >= 0xd0 && d[i+1] <= 0xd7) {
+				if d[i] == 0xff {
+					i++
 				}
 
-				j++
+				i++
 			}
-
-			out = append(out, d[i:j]...)
-			i = j
 
 			continue
 		case m == 0xdb, m == 0xc4, m == 0xdd, m == 0xdc, m == 0xcc, m >= 0xc0 && m <= 0xcf && m != 0xc8:
-			out = append(out, 0xff, m)
-			out = append(out, seg...)
 		default:
-			return nil, 0, nil, fmt.Errorf("JPEG marker %#x is not one kreida knows", m)
+			return 0, nil, fmt.Errorf("JPEG marker %#x is not one kreida knows", m)
 		}
 
 		i += n
@@ -308,11 +321,15 @@ func joinICC(parts map[int][]byte, count int) ([]byte, error) {
 		return nil, nil
 	}
 
+	if len(parts) != count {
+		return nil, errors.New("JPEG colour profile segments do not add up")
+	}
+
 	var out []byte
 
 	for i := 1; i <= count; i++ {
 		p, ok := parts[i]
-		if !ok || len(parts) != count {
+		if !ok || len(out)+len(p) > MaxFile {
 			return nil, errors.New("JPEG colour profile segments do not add up")
 		}
 
@@ -324,9 +341,8 @@ func joinICC(parts map[int][]byte, count int) ([]byte, error) {
 
 // ----- PNG
 
-// cleanPNG reads a PNG whole and writes its pixels again: no chunk the encoder does not write survives, and a broken
-// pixel stream fails the decode. Only the colour of the original comes along: sRGB, gamma, chromaticities and a
-// cleaned ICC profile. An animated PNG becomes its default image. A picture its EXIF turns is turned in its pixels.
+// cleanPNG decodes a PNG and writes its pixels again, losslessly. Its sRGB, gamma and chromaticities come along, and
+// its ICC profile rebuilt. An animated PNG becomes its default image. A picture its EXIF turns is turned.
 func cleanPNG(d []byte) ([]byte, int, error) {
 	if !bytes.HasPrefix(d, []byte(pngSignature)) {
 		return nil, 0, errors.New("not a PNG")
@@ -385,47 +401,20 @@ func cleanPNG(d []byte) ([]byte, int, error) {
 		return nil, 0, errPixels
 	}
 
-	if orient != 1 {
-		src = upright(src, orient)
-	}
-
-	var buf bytes.Buffer
-	if err := png.Encode(&buf, src); err != nil {
-		return nil, 0, err
-	}
-
-	out := buf.Bytes()
+	var (
+		profile []byte
+		space   string
+	)
 
 	if iccp != nil {
-		profile, space, err := iccpProfile(iccp)
-		if err != nil {
+		if profile, space, err = iccpProfile(iccp); err != nil {
 			return nil, 0, err
 		}
-
-		want := "RGB "
-		if ct := out[25]; ct == 0 || ct == 4 {
-			want = "GRAY"
-		}
-
-		if space != want {
-			if orient != 1 {
-				return nil, 0, errTurned
-			}
-
-			return nil, 0, errors.New("its colour profile does not fit its pixels")
-		}
-
-		var z bytes.Buffer
-
-		zw, _ := zlib.NewWriterLevel(&z, zlib.BestCompression)
-		_, _ = zw.Write(profile)
-		_ = zw.Close()
-
-		colour = append(colour, pngChunk("iCCP", append([]byte("ICC Profile\x00\x00"), z.Bytes()...))...)
 	}
 
-	// the colour goes right after IHDR (signature 8, IHDR 25), before any palette or data
-	return slices.Concat(out[:33], colour, out[33:]), orient, nil
+	out, err := encodePNG(upright(src, orient), colour, profile, space)
+
+	return out, orient, err
 }
 
 const pngSignature = "\x89PNG\r\n\x1a\n"
@@ -438,22 +427,22 @@ func pngChunk(typ string, data []byte) []byte {
 	return binary.BigEndian.AppendUint32(out, crc32.ChecksumIEEE(out[4:]))
 }
 
-// iccpProfile reads the profile out of an iCCP chunk (a name, the method, the zlib stream) and cleans it. The name
+// iccpProfile reads the profile out of an iCCP chunk (a name, the method, the zlib stream) and rebuilds it. The name
 // does not come along.
 func iccpProfile(data []byte) ([]byte, string, error) {
 	name := bytes.IndexByte(data, 0)
 	if name < 1 || name > 79 || len(data) < name+2 || data[name+1] != 0 {
-		return nil, "", errors.New("PNG colour profile unreadable")
+		return nil, "", errProfile
 	}
 
 	zr, err := zlib.NewReader(bytes.NewReader(data[name+2:]))
 	if err != nil {
-		return nil, "", errors.New("PNG colour profile unreadable")
+		return nil, "", errProfile
 	}
 
 	raw, err := io.ReadAll(io.LimitReader(zr, MaxFile+1))
 	if err != nil || len(raw) > MaxFile {
-		return nil, "", errors.New("PNG colour profile unreadable")
+		return nil, "", errProfile
 	}
 
 	return cleanICC(raw)
@@ -461,15 +450,33 @@ func iccpProfile(data []byte) ([]byte, string, error) {
 
 // ----- GIF
 
-// maxFramePixels bounds the pixels of all a GIF's frames together, so checking one cannot take the machine's memory.
+// maxFramePixels bounds the pixels of all a GIF's frames together, so decoding one cannot take the machine's memory.
 const maxFramePixels = 4 * MaxPixels
 
-// cleanGIF keeps the screen, the colour tables, the frames, each frame's timing and the loop count, the last two
-// written in their standard form; comments, plain text and every other application block (XMP among them) go, and so
-// does anything after the trailer. The result is decoded whole, every frame.
+// cleanGIF decodes every frame of a GIF and writes them again, losslessly, with their palettes, timing, disposal and
+// the loop count: no comment, plain text or application block survives.
 func cleanGIF(d []byte) ([]byte, error) {
+	if err := gifFrames(d); err != nil {
+		return nil, err
+	}
+
+	g, err := gif.DecodeAll(bytes.NewReader(d))
+	if err != nil {
+		return nil, errPixels
+	}
+
+	var buf bytes.Buffer
+	if err := gif.EncodeAll(&buf, g); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+// gifFrames walks a GIF's blocks and checks that all its frames together stay within maxFramePixels.
+func gifFrames(d []byte) error {
 	if len(d) < 13 {
-		return nil, errors.New("GIF too short")
+		return errors.New("GIF too short")
 	}
 
 	i := 13
@@ -477,61 +484,31 @@ func cleanGIF(d []byte) ([]byte, error) {
 		i += 3 << (d[10]&7 + 1)
 	}
 
-	if i > len(d) {
-		return nil, errors.New("GIF ends inside its colour table")
-	}
-
-	out := append([]byte{}, d[:i]...)
 	pixels := 0
 
-	for done := false; !done; {
+	for {
 		if i >= len(d) {
-			return nil, errors.New("GIF ends before its trailer")
+			return errors.New("GIF ends before its trailer")
 		}
 
 		switch d[i] {
 		case 0x3b:
-			out = append(out, 0x3b)
-			done = true
+			return nil
 		case 0x21:
-			if i+3 > len(d) {
-				return nil, errors.New("GIF ends inside an extension")
-			}
-
 			end, err := subBlocks(d, i+2)
 			if err != nil {
-				return nil, err
-			}
-
-			first := d[i+3 : min(i+3+int(d[i+2]), end)]
-
-			switch label := d[i+1]; {
-			case label == 0xf9:
-				// timing, disposal and transparency in four bytes; the reserved bits cleared
-				if len(first) != 4 {
-					return nil, errors.New("GIF frame timing block has the wrong size")
-				}
-
-				out = append(out, 0x21, 0xf9, 4, first[0]&0x1f, first[1], first[2], first[3], 0)
-			case label == 0xff && (string(first) == "NETSCAPE2.0" || string(first) == "ANIMEXTS1.0"):
-				// the loop count, if that is what the block says
-				j := i + 3 + len(first)
-				if j+4 <= end && d[j] == 3 && d[j+1] == 1 {
-					out = append(out, 0x21, 0xff, 11)
-					out = append(out, "NETSCAPE2.0"...)
-					out = append(out, 3, 1, d[j+2], d[j+3], 0)
-				}
+				return err
 			}
 
 			i = end
 		case 0x2c:
 			if i+10 > len(d) {
-				return nil, errors.New("GIF ends inside a frame")
+				return errors.New("GIF ends inside a frame")
 			}
 
 			pixels += int(binary.LittleEndian.Uint16(d[i+5:])) * int(binary.LittleEndian.Uint16(d[i+7:]))
 			if pixels > maxFramePixels {
-				return nil, errors.New("GIF frames hold too many pixels")
+				return errors.New("GIF frames hold too many pixels")
 			}
 
 			j := i + 10
@@ -541,21 +518,14 @@ func cleanGIF(d []byte) ([]byte, error) {
 
 			end, err := subBlocks(d, j+1) // after the LZW code size
 			if err != nil {
-				return nil, err
+				return err
 			}
 
-			out = append(out, d[i:end]...)
 			i = end
 		default:
-			return nil, fmt.Errorf("GIF block %#x is not one kreida knows", d[i])
+			return fmt.Errorf("GIF block %#x is not one kreida knows", d[i])
 		}
 	}
-
-	if _, err := gif.DecodeAll(bytes.NewReader(out)); err != nil {
-		return nil, errPixels
-	}
-
-	return out, nil
 }
 
 // subBlocks finds the end of a run of GIF data sub-blocks that starts at i.
@@ -606,82 +576,65 @@ func riffChunks(d []byte) ([]riffChunk, error) {
 	return out, nil
 }
 
-func riffBytes(id string, data []byte) []byte {
-	out := append([]byte(id), binary.LittleEndian.AppendUint32(nil, uint32(len(data)))...)
-	out = append(out, data...)
-
-	if len(data)%2 == 1 {
-		out = append(out, 0)
-	}
-
-	return out
-}
-
-// cleanWebP keeps one still picture: its bitstream, its alpha and a cleaned ICC profile, under a header that names
-// only those. EXIF, XMP and unknown chunks go, and so does anything after the RIFF's end. An animated WebP, and one
-// its EXIF turns, are refused: there is no WebP encoder here to put them right. The result is decoded whole.
-func cleanWebP(d []byte) ([]byte, error) {
+// cleanWebP decodes a still WebP and writes it again as a PNG (lossless or with alpha) or a JPEG (lossy), with its
+// colour profile rebuilt; there is no WebP encoder here. Before any decoding, the frame inside must be the size the
+// file says it is (w×h): a small header over a huge frame is refused. An animated WebP is refused.
+func cleanWebP(d []byte, w, h int) ([]byte, int, error) {
 	if len(d) < 12 || string(d[:4]) != "RIFF" || string(d[8:12]) != "WEBP" {
-		return nil, errors.New("not a WebP")
+		return nil, 0, errors.New("not a WebP")
 	}
 
 	size := int(binary.LittleEndian.Uint32(d[4:]))
 	if size < 4 || size > len(d)-8 {
-		return nil, errors.New("WebP is shorter than it says")
+		return nil, 0, errors.New("WebP is shorter than it says")
 	}
 
 	chunks, err := riffChunks(d[12 : 8+size])
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	if len(chunks) == 0 {
-		return nil, errors.New("WebP has no picture")
+		return nil, 0, errors.New("WebP has no picture")
 	}
 
-	var body []byte
+	var (
+		icc, picture []byte
+		lossless     = chunks[0].id == "VP8L"
+		alpha        bool
+		orient       = 1
+		exif         bool
+	)
 
 	switch chunks[0].id {
 	case "VP8 ", "VP8L":
-		body = chunks[0].raw
+		picture = chunks[0].raw
 	case "VP8X":
-		head := chunks[0].data
-		if len(head) != 10 {
-			return nil, errors.New("WebP VP8X chunk has the wrong size")
+		if len(chunks[0].data) != 10 {
+			return nil, 0, errors.New("WebP VP8X chunk has the wrong size")
 		}
 
-		if head[0]&0x02 != 0 {
-			return nil, errors.New("an animated WebP; kreida shows still WebP pictures only")
+		if chunks[0].data[0]&0x02 != 0 {
+			return nil, 0, errors.New("an animated WebP; kreida shows still WebP pictures only")
 		}
 
-		var icc, alpha, picture []byte
-
-		orient, exif, pictures := 1, false, 0
+		pictures := 0
 
 		for _, c := range chunks[1:] {
 			switch c.id {
 			case "ICCP":
 				if icc != nil {
-					return nil, errors.New("WebP has two colour profiles")
+					return nil, 0, errors.New("WebP has two colour profiles")
 				}
 
-				profile, space, err := cleanICC(c.data)
-				if err != nil {
-					return nil, err
-				}
-
-				if space != "RGB " {
-					return nil, errors.New("its colour profile does not fit its pixels")
-				}
-
-				icc = riffBytes("ICCP", profile)
+				icc = c.data
 			case "ALPH":
-				alpha = c.raw
+				alpha = true
 			case "VP8 ", "VP8L":
-				picture = c.raw
+				picture, lossless = c.raw, c.id == "VP8L"
 				pictures++
 			case "ANIM", "ANMF":
-				return nil, errors.New("an animated WebP; kreida shows still WebP pictures only")
+				return nil, 0, errors.New("an animated WebP; kreida shows still WebP pictures only")
 			case "EXIF":
 				if !exif {
 					exif, orient = true, orientation(bytes.TrimPrefix(c.data, exifID))
@@ -690,31 +643,45 @@ func cleanWebP(d []byte) ([]byte, error) {
 		}
 
 		if pictures != 1 {
-			return nil, errors.New("WebP must hold one picture")
+			return nil, 0, errors.New("WebP must hold one picture")
 		}
-
-		if orient != 1 {
-			return nil, errors.New("its EXIF turns it, which kreida cannot do for a WebP; save the picture upright")
-		}
-
-		flags := head[0] & 0x10 // alpha
-		if icc != nil {
-			flags |= 0x20
-		}
-
-		body = riffBytes("VP8X", append([]byte{flags, 0, 0, 0}, head[4:]...))
-		body = slices.Concat(body, icc, alpha, picture)
 	default:
-		return nil, fmt.Errorf("WebP starts with chunk %q", chunks[0].id)
+		return nil, 0, fmt.Errorf("WebP starts with chunk %q", chunks[0].id)
 	}
 
-	out := slices.Concat([]byte("RIFF"), binary.LittleEndian.AppendUint32(nil, uint32(4+len(body))), []byte("WEBP"), body)
+	// the frame's own header, read as a WebP of its own, before anything is decoded
+	alone := slices.Concat([]byte("RIFF"), binary.LittleEndian.AppendUint32(nil, uint32(4+len(picture))), []byte("WEBP"), picture)
 
-	if _, err := webp.Decode(bytes.NewReader(out)); err != nil {
-		return nil, errPixels
+	if _, fw, fh, err := sniff(alone); err != nil || fw != w || fh != h {
+		return nil, 0, errors.New("the WebP frame is not the size its header says")
 	}
 
-	return out, nil
+	var (
+		profile []byte
+		space   string
+	)
+
+	if icc != nil {
+		if profile, space, err = cleanICC(icc); err != nil {
+			return nil, 0, err
+		}
+	}
+
+	src, err := webp.Decode(bytes.NewReader(d))
+	if err != nil || src.Bounds().Dx() != w || src.Bounds().Dy() != h {
+		return nil, 0, errPixels
+	}
+
+	up := upright(src, orient)
+
+	var out []byte
+	if lossless || alpha {
+		out, err = encodePNG(up, nil, profile, space)
+	} else {
+		out, err = encodeJPEG(up, profile, space)
+	}
+
+	return out, orient, err
 }
 
 // ----- orientation
@@ -766,24 +733,41 @@ func orientation(t []byte) int {
 	return 1
 }
 
-// upright draws a picture the way its EXIF orientation says it is to be seen.
-func upright(src image.Image, orient int) *image.NRGBA {
+// upright draws a picture the way its EXIF orientation says it is to be seen. An upright picture is returned as it is;
+// a grey one stays grey; anything else becomes NRGBA.
+func upright(src image.Image, orient int) image.Image {
+	if orient <= 1 || orient > 8 {
+		return src
+	}
+
 	b := src.Bounds()
 	w, h := b.Dx(), b.Dy()
-
-	flat := image.NewNRGBA(image.Rect(0, 0, w, h))
-	draw.Draw(flat, flat.Bounds(), src, b.Min, draw.Src)
-
-	if orient <= 1 || orient > 8 {
-		return flat
-	}
 
 	dw, dh := w, h
 	if orient >= 5 {
 		dw, dh = h, w
 	}
 
-	dst := image.NewNRGBA(image.Rect(0, 0, dw, dh))
+	var (
+		from, to []byte
+		fromAt   func(x, y int) int
+		toAt     func(x, y int) int
+		px       int
+		dst      image.Image
+	)
+
+	if g, ok := src.(*image.Gray); ok {
+		d := image.NewGray(image.Rect(0, 0, dw, dh))
+		from, fromAt = g.Pix, func(x, y int) int { return g.PixOffset(b.Min.X+x, b.Min.Y+y) }
+		to, toAt, px, dst = d.Pix, d.PixOffset, 1, d
+	} else {
+		flat := image.NewNRGBA(image.Rect(0, 0, w, h))
+		draw.Draw(flat, flat.Bounds(), src, b.Min, draw.Src)
+
+		d := image.NewNRGBA(image.Rect(0, 0, dw, dh))
+		from, fromAt = flat.Pix, flat.PixOffset
+		to, toAt, px, dst = d.Pix, d.PixOffset, 4, d
+	}
 
 	for y := range h {
 		for x := range w {
@@ -806,8 +790,8 @@ func upright(src image.Image, orient int) *image.NRGBA {
 				dx, dy = y, w-1-x
 			}
 
-			s, t := flat.PixOffset(x, y), dst.PixOffset(dx, dy)
-			copy(dst.Pix[t:t+4], flat.Pix[s:s+4])
+			s, t := fromAt(x, y), toAt(dx, dy)
+			copy(to[t:t+px], from[s:s+px])
 		}
 	}
 

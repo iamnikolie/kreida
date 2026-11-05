@@ -249,11 +249,13 @@ show the card without a picture and without the reason. Read stderr before you s
 
 What leaves the machine: the path never does, in any JSON or file, only the bytes, and those stripped of metadata first.
 An export, a share link and a publish drop EXIF (GPS, camera, dates), XMP, IPTC, comments, PNG text chunks and anything
-after the picture, in all four formats. Every picture is decoded whole first; a PNG is written again losslessly (an
-animated PNG becomes its first image). A colour profile stays, with its description, copyright, names and dates taken
-out. A photo that EXIF turns is turned in its pixels first, its colour profile with it (a turned JPEG is saved again at
-quality 92). Refused, never sent as is: a file that cannot be stripped or whose pixels do not decode, an animated WebP,
-a WebP that EXIF turns, a turned picture whose profile cannot follow (grey or CMYK); save those upright or as PNG. Your own editor and `kreida png` show the file as
+after the picture, in all four formats: every picture is decoded whole and written again from its pixels, so no byte of
+the original file goes out. A JPEG is saved again at quality 92; a PNG and a GIF losslessly (an animated PNG becomes its
+first image, a GIF keeps its frames); a WebP becomes a PNG (lossless or with alpha) or a JPEG (lossy). The colour
+profile is rebuilt from its numbers: an RGB matrix profile or a grey one, described as "ICC", nothing else in it. A
+photo that EXIF turns is turned in its pixels first, its profile with it. Refused, never sent as is: a file that cannot
+be read or whose pixels do not decode, an animated WebP, a profile kreida cannot rebuild (lookup-table or CMYK; save
+the picture as sRGB), a CMYK JPEG with a profile. Your own editor and `kreida png` show the file as
 it is. An export or a publish still carries the picture of any image the board names, so check where a board's paths
 point before you send it. On a published board only that board's images go up. A changed image file reaches the open page and, for a
 published board, the cloud within seconds, by the same route as a changed board.

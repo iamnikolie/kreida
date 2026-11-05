@@ -194,7 +194,12 @@ func sniff(data []byte) (typ string, w, h int, err error) {
 func webpConfig(d []byte) (image.Config, error) {
 	bad := errors.New("bad WebP header")
 
-	if len(d) < 30 {
+	if len(d) < 16 {
+		return image.Config{}, bad
+	}
+
+	need := map[string]int{"VP8 ": 30, "VP8L": 25, "VP8X": 30}[string(d[12:16])]
+	if need == 0 || len(d) < need {
 		return image.Config{}, bad
 	}
 

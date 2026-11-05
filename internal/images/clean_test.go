@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"compress/zlib"
 	"encoding/binary"
+	"encoding/hex"
+	"fmt"
 	"image"
 	"image/color"
 	"image/gif"
@@ -12,6 +14,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
@@ -114,38 +117,60 @@ func fixture(t *testing.T, name string) []byte {
 	return d
 }
 
-func TestAWebPLosesItsEXIFAndXMPAndKeepsItsPictureAlphaAndColour(t *testing.T) {
+func TestAWebPGoesOutAsAPNGOrAJPEGWithoutItsTags(t *testing.T) {
 	raw := append(fixture(t, "meta.webp"), "webp-secret-tail"...)
 	require.Contains(t, string(raw), "secret-webp-exif")
 	require.Contains(t, string(raw), "secret-icc-desc")
 
+	// lossy with alpha: a PNG, so the alpha stays
 	c := clean(t, raw)
+	assert.Equal(t, "image/png", c.Type)
 	assert.NotContains(t, string(c.Bytes), "secret")
-	assert.NotContains(t, string(c.Bytes), "EXIF")
-	assert.NotContains(t, string(c.Bytes), "XMP")
-	assert.Contains(t, string(c.Bytes), "ICCP", "the colour profile stays, cleaned")
-	assert.Contains(t, string(c.Bytes), "ALPH")
-	assert.Equal(t, byte(0x30), c.Bytes[20], "only the ICC and alpha flags are on")
-	assert.Equal(t, len(c.Bytes)-8, int(binary.LittleEndian.Uint32(c.Bytes[4:])))
+	assertCleanProfile(t, iccOf(t, c))
 	assert.Equal(t, 12, c.W)
 	assert.Equal(t, 7, c.H)
 
-	img, err := webp.Decode(bytes.NewReader(c.Bytes))
+	img, err := png.Decode(bytes.NewReader(c.Bytes))
 	require.NoError(t, err)
 
 	_, _, _, a := img.At(9, 3).RGBA()
 	assert.Less(t, a, uint32(0xffff), "the half-transparent half kept its alpha")
 
+	// lossless: a PNG with the very same pixels
 	plain := clean(t, fixture(t, "plain.webp"))
-	assert.Equal(t, fixture(t, "plain.webp"), plain.Bytes, "a simple WebP has nothing to lose")
+	assert.Equal(t, "image/png", plain.Type)
+
+	want, err := webp.Decode(bytes.NewReader(fixture(t, "plain.webp")))
+	require.NoError(t, err)
+
+	got, err := png.Decode(bytes.NewReader(plain.Bytes))
+	require.NoError(t, err)
+	assert.Equal(t, color.NRGBAModel.Convert(want.At(3, 3)), color.NRGBAModel.Convert(got.At(3, 3)))
+
+	// lossy and opaque: a JPEG
+	opaque := slices.Concat([]byte("RIFF\x00\x00\x00\x00WEBP"), vp8Chunk(t))
+	binary.LittleEndian.PutUint32(opaque[4:], uint32(len(opaque)-8))
+	assert.Equal(t, "image/jpeg", clean(t, opaque).Type)
 }
 
-func TestAWebPThatMovesOrThatEXIFTurnsIsRefused(t *testing.T) {
-	_, err := images.Clean(load(t, fixture(t, "turned.webp")))
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "save the picture upright")
+// vp8Chunk is the lossy bitstream chunk of meta.webp: an opaque lossy WebP once it stands alone.
+func vp8Chunk(t *testing.T) []byte {
+	t.Helper()
 
-	_, err = images.Clean(load(t, fixture(t, "anim.webp")))
+	d := fixture(t, "meta.webp")
+	at := bytes.Index(d, []byte("VP8 "))
+	n := int(binary.LittleEndian.Uint32(d[at+4:]))
+
+	return d[at : at+8+n+n&1]
+}
+
+func TestAWebPThatEXIFTurnsIsTurnedAndAnAnimatedOneRefused(t *testing.T) {
+	c := clean(t, fixture(t, "turned.webp"))
+	assert.Equal(t, 7, c.W)
+	assert.Equal(t, 12, c.H)
+	assert.NotContains(t, string(c.Bytes), "secret")
+
+	_, err := images.Clean(load(t, fixture(t, "anim.webp")))
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "animated WebP")
 }
@@ -305,7 +330,6 @@ func TestKeptBlocksKeepOnlyTheirStandardFields(t *testing.T) {
 	withAdobe := slices.Concat(jpg[:2], segment(0xee, []byte("Adobe\x00\x64\x00\x00\x00\x00\x01private-adobe-trailer")), jpg[2:])
 	c := clean(t, withAdobe)
 	assert.NotContains(t, string(c.Bytes), "private-adobe")
-	assert.Contains(t, string(c.Bytes), "Adobe\x00\x64\x00\x00\x00\x00\x01")
 
 	// the loop block keeps its count; the timing block its four bytes
 	g := gifWith(t)
@@ -313,13 +337,8 @@ func TestKeptBlocksKeepOnlyTheirStandardFields(t *testing.T) {
 	require.Equal(t, byte(0), g[loop])
 	g = slices.Concat(g[:loop], []byte{18}, []byte("private-loop-secret"[:18]), g[loop:])
 
-	gce := bytes.Index(g, []byte{0x21, 0xf9, 4}) + 7 // its terminator
-	require.Equal(t, byte(0), g[gce])
-	g = slices.Concat(g[:gce], []byte{5}, []byte("gce-x"), g[gce:])
-
 	c = clean(t, g)
 	assert.NotContains(t, string(c.Bytes), "private-loop")
-	assert.NotContains(t, string(c.Bytes), "gce-x")
 
 	out, err := gif.DecodeAll(bytes.NewReader(c.Bytes))
 	require.NoError(t, err)
@@ -386,7 +405,7 @@ func assertCleanProfile(t *testing.T, profile []byte) {
 	assert.Equal(t, len(profile), int(binary.BigEndian.Uint32(profile)))
 	assert.Equal(t, "acsp", string(profile[36:40]))
 	assert.Contains(t, string(profile), "curv\x00\x00\x00\x00\x00\x00\x00\x01\x02\x33", "the tone curve stays")
-	assert.Contains(t, string(profile), "rXYZ")
+	assert.Contains(t, string(profile), "TRC")
 	assert.Contains(t, string(profile), "desc")
 	assert.NotContains(t, string(profile), "dmdd")
 	assert.NotContains(t, string(profile), "priv")
@@ -414,9 +433,9 @@ func TestASystemProfileKeepsEveryColourTag(t *testing.T) {
 	out := iccOf(t, j)
 
 	n := func(p []byte) int { return int(binary.BigEndian.Uint32(p[128:])) }
-	assert.Equal(t, n(sys), n(out), "all of its tags are colour or desc/cprt")
+	assert.Equal(t, n(sys), n(out), "all of its tags are matrix, curves or desc/cprt")
 	assert.Equal(t, sys[16:20], out[16:20])
-	assert.Equal(t, sys[64:80], out[64:80], "rendering intent and illuminant")
+	assert.Equal(t, sys[64:80], out[64:80], "rendering intent and the D50 illuminant")
 }
 
 func TestATurnedPictureKeepsItsColour(t *testing.T) {
@@ -434,10 +453,23 @@ func TestATurnedPictureKeepsItsColour(t *testing.T) {
 	assertCleanProfile(t, iccOf(t, p))
 	assert.Contains(t, string(p.Bytes), "gAMA")
 
-	// a grey profile cannot follow a picture that turning makes colour
+	// a grey picture stays grey when turned, and keeps its grey profile
+	var gray bytes.Buffer
+	require.NoError(t, jpeg.Encode(&gray, image.NewGray(image.Rect(0, 0, 32, 16)), nil))
+
+	exif := segment(0xe1, append([]byte("Exif\x00\x00"), exifTIFF(6, "s")...))
+	g := clean(t, withJPEGProfile(slices.Concat(gray.Bytes()[:2], exif, gray.Bytes()[2:]), fixture(t, "gray.icc")))
+	assert.Equal(t, 16, g.W)
+	assertCleanProfile(t, iccOf(t, g))
+
+	gimg, err := jpeg.Decode(bytes.NewReader(g.Bytes))
+	require.NoError(t, err)
+	assert.IsType(t, &image.Gray{}, gimg)
+
+	// a grey profile on a colour picture fits nothing
 	_, err = images.Clean(load(t, withJPEGProfile(taggedJPEG(t, 32, 16, 6, "s"), fixture(t, "gray.icc"))))
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "save the picture upright")
+	assert.Contains(t, err.Error(), "does not fit its pixels")
 }
 
 func TestABrokenProfileIsRefused(t *testing.T) {
@@ -453,4 +485,159 @@ func TestABrokenProfileIsRefused(t *testing.T) {
 	_, err = images.Clean(load(t, missing))
 	require.Error(t, err)
 	assert.True(t, strings.Contains(err.Error(), "do not add up"))
+}
+
+// ----- second review
+
+func TestAWebPWhoseFrameIsNotItsHeadersSizeIsRefusedBeforeDecoding(t *testing.T) {
+	// 54 bytes: a 1×1 canvas over a lossless frame of 6401×6250
+	tiny, err := hex.DecodeString("524946462e00000057454250565038580a000000000000000000000000005650384c100000002f00591a068888080000000000000000")
+	require.NoError(t, err)
+
+	f := load(t, tiny)
+	require.Equal(t, 1, f.W)
+
+	var before, after runtime.MemStats
+
+	runtime.GC()
+	runtime.ReadMemStats(&before)
+
+	_, err = images.Clean(f)
+
+	runtime.ReadMemStats(&after)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "not the size its header says")
+	assert.Less(t, after.TotalAlloc-before.TotalAlloc, uint64(8<<20), "nothing of the frame's size was allocated")
+
+	// committed plain.webp (12×7) under a 1×1 VP8X
+	inner := fixture(t, "plain.webp")[12:]
+	wrapped := slices.Concat([]byte("RIFF\x00\x00\x00\x00WEBPVP8X\x0a\x00\x00\x00"), make([]byte, 10), inner)
+	binary.LittleEndian.PutUint32(wrapped[4:], uint32(len(wrapped)-8))
+
+	_, err = images.Clean(load(t, wrapped))
+	require.Error(t, err)
+}
+
+// profileWith is rgb.icc with its rTRC pointing at body, appended at its end.
+func profileWith(t *testing.T, body []byte) []byte {
+	t.Helper()
+
+	p := append([]byte{}, fixture(t, "rgb.icc")...)
+	off := len(p)
+	p = append(p, body...)
+	binary.BigEndian.PutUint32(p, uint32(len(p)))
+
+	for i := range int(binary.BigEndian.Uint32(p[128:])) {
+		e := 128 + 4 + 12*i
+		if string(p[e:e+4]) == "rTRC" {
+			binary.BigEndian.PutUint32(p[e+4:], uint32(off))
+			binary.BigEndian.PutUint32(p[e+8:], uint32(len(body)))
+		}
+	}
+
+	return p
+}
+
+func TestATagKeepsOnlyItsNumbers(t *testing.T) {
+	for name, body := range map[string][]byte{
+		"text after a curve":    []byte("curv\x00\x00\x00\x00\x00\x00\x00\x01\x02\x33private-profile-owner@example.test"),
+		"text in reserved":      []byte("curvUSER\x00\x00\x00\x01\x02\x33\x00\x00"),
+		"text after no points":  []byte("curv\x00\x00\x00\x00\x00\x00\x00\x00private-zero-count"),
+		"text after parameters": []byte("paraSECR\x00\x00PRIV\x00\x02\x33\x33private-para"),
+	} {
+		c := clean(t, withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), profileWith(t, body)))
+		out := string(iccOf(t, c))
+		assert.NotContains(t, out, "private", name)
+		assert.NotContains(t, out, "USER", name)
+		assert.NotContains(t, out, "SECR", name)
+		assert.NotContains(t, out, "PRIV", name)
+	}
+
+	// a colour tag under a name kreida does not carry, and a tag twice
+	p := append([]byte{}, fixture(t, "rgb.icc")...)
+	for i := range int(binary.BigEndian.Uint32(p[128:])) {
+		if e := 128 + 4 + 12*i; string(p[e:e+4]) == "bkpt" || string(p[e:e+4]) == "priv" {
+			copy(p[e:], "zzzz")
+		}
+	}
+
+	out := string(iccOf(t, clean(t, withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), p))))
+	assert.NotContains(t, out, "zzzz")
+
+	twice := append([]byte{}, fixture(t, "rgb.icc")...)
+	copy(twice[128+4+12*3:], "wtpt")
+
+	_, err := images.Clean(load(t, withJPEGProfile(taggedJPEG(t, 16, 8, 1, "s"), twice)))
+	require.Error(t, err)
+}
+
+func TestOverlappingTagsCannotBlowAProfileUp(t *testing.T) {
+	// a hundred tags; all but the matrix point at one 128 KiB curve, each a little shorter than the last
+	const n, size = 100, 128 << 10
+
+	table := 128 + 4 + 12*n
+	xyz, curve := table, table+20
+	p := make([]byte, curve+size)
+	binary.BigEndian.PutUint32(p, uint32(len(p)))
+	p[8] = 2
+	copy(p[12:], "mntrRGB XYZ ")
+	copy(p[36:], "acsp")
+	binary.BigEndian.PutUint32(p[128:], n)
+	copy(p[xyz:], "XYZ \x00\x00\x00\x00\x00\x00\xf6\xd6\x00\x01\x00\x00\x00\x00\xd3\x2d")
+	copy(p[curve:], "curv")
+	binary.BigEndian.PutUint32(p[curve+8:], 4096)
+
+	for i := range n {
+		e := 128 + 4 + 12*i
+
+		switch {
+		case i < 4:
+			copy(p[e:], []string{"wtpt", "rXYZ", "gXYZ", "bXYZ"}[i])
+			binary.BigEndian.PutUint32(p[e+4:], uint32(xyz))
+			binary.BigEndian.PutUint32(p[e+8:], 20)
+		default:
+			sig := fmt.Sprintf("t%03d", i)
+			if i < 7 {
+				sig = []string{"rTRC", "gTRC", "bTRC"}[i-4]
+			}
+
+			copy(p[e:], sig)
+			binary.BigEndian.PutUint32(p[e+4:], uint32(curve))
+			binary.BigEndian.PutUint32(p[e+8:], uint32(size-4*i))
+		}
+	}
+
+	c := clean(t, withPNGProfile(t, taggedPNG(t, 4, 2, 1, "s"), p, "x"))
+	assert.Less(t, len(iccOf(t, c)), 12<<10, "the 4096-point curve once, not a hundred times")
+
+	// the same tag name twice is refused
+	copy(p[128+4+12*8:], "rTRC")
+
+	_, err := images.Clean(load(t, withPNGProfile(t, taggedPNG(t, 4, 2, 1, "s"), p, "x")))
+	require.Error(t, err)
+}
+
+func TestUnusedBytesInsideAStreamDoNotRideOut(t *testing.T) {
+	jpg := taggedJPEG(t, 16, 8, 1, "s")
+	end := bytes.LastIndex(jpg, []byte{0xff, 0xd9})
+	scan := slices.Concat(jpg[:end], []byte("private-unused-scan-owner@example.test"), jpg[end:])
+
+	_, err := jpeg.Decode(bytes.NewReader(scan))
+	require.NoError(t, err, "the decoder skips it")
+	assert.NotContains(t, string(clean(t, scan).Bytes), "private-unused")
+
+	w := fixture(t, "plain.webp")
+	n := int(binary.LittleEndian.Uint32(w[16:]))
+	extra := "private-unused-webp-owner@example.test"
+	chunk := slices.Concat([]byte("VP8L"), binary.LittleEndian.AppendUint32(nil, uint32(n+len(extra))), w[20:20+n], []byte(extra))
+	if len(chunk)%2 == 1 {
+		chunk = append(chunk, 0)
+	}
+
+	webpIn := slices.Concat([]byte("RIFF\x00\x00\x00\x00WEBP"), chunk)
+	binary.LittleEndian.PutUint32(webpIn[4:], uint32(len(webpIn)-8))
+
+	_, err = webp.Decode(bytes.NewReader(webpIn))
+	require.NoError(t, err, "the decoder skips it")
+	assert.NotContains(t, string(clean(t, webpIn).Bytes), "private-unused")
 }
