@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/iamnikolie/kreida/internal/board"
 	"github.com/iamnikolie/kreida/internal/history"
+	"github.com/iamnikolie/kreida/internal/images"
 	"github.com/iamnikolie/kreida/internal/notes"
 	"github.com/iamnikolie/kreida/internal/paths"
 	"github.com/iamnikolie/kreida/internal/templates"
@@ -67,8 +69,9 @@ type boardResp struct {
 	Error string          `json:"error,omitempty"`
 }
 
-// boardResponse reads a board for the page: the normalized board and its card positions, or the parse error.
-func (s *Server) boardResponse(name string) boardResp {
+// boardResponse reads a board for the page: the normalized board and its card positions, or the parse error. attach
+// fills in the cards' images: images.Attach for the owner's editor, images.Public for a share link.
+func (s *Server) boardResponse(name string, attach func(*board.Board, string) images.Set) boardResp {
 	text, err := os.ReadFile(s.cfg.Paths.BoardFile(name))
 	if err != nil {
 		return boardResp{Name: name, Error: err.Error()}
@@ -79,7 +82,51 @@ func (s *Server) boardResponse(name string) boardResp {
 		return boardResp{Name: name, Error: err.Error()}
 	}
 
+	attach(b, s.cfg.Paths.Dir)
+
 	return boardResp{Name: name, Board: b, Pos: board.ReadPos(s.cfg.Paths.PosFile(name))}
+}
+
+// image serves the bytes of an image of a board, for the editor and for a share link. Only a hash on the board as it
+// is now gets an answer, so a share link never reaches another image on this machine. The type is the one the content
+// was found to be, the page may not be read as anything else, and the browser asks again every time, so a revoked link
+// stops at the next load.
+func (s *Server) image(w http.ResponseWriter, r *http.Request, name, sha string) {
+	f, ok := s.imageOf(name, sha)
+	if !ok {
+		writeJSON(w, http.StatusNotFound, map[string]string{"error": "no such image"})
+
+		return
+	}
+
+	h := w.Header()
+	h.Set("Content-Type", f.Type)
+	h.Set("X-Content-Type-Options", "nosniff")
+	h.Set("Content-Security-Policy", "default-src 'none'; sandbox")
+	h.Set("Cache-Control", "private, no-cache")
+	h.Set("ETag", `"`+f.SHA256+`"`)
+	http.ServeContent(w, r, "", time.Time{}, bytes.NewReader(f.Bytes))
+}
+
+// imageOf finds an image by its hash among those the board names now.
+func (s *Server) imageOf(name, sha string) (images.File, bool) {
+	if !images.ValidSHA(sha) {
+		return images.File{}, false
+	}
+
+	text, err := os.ReadFile(s.cfg.Paths.BoardFile(name))
+	if err != nil {
+		return images.File{}, false
+	}
+
+	b, err := board.Parse(string(text))
+	if err != nil {
+		return images.File{}, false
+	}
+
+	f, ok := images.Attach(b, s.cfg.Paths.Dir).Files[sha]
+
+	return f, ok
 }
 
 // api is /api/boards[/<name>[/<sub>[/<id>]]].
@@ -163,7 +210,9 @@ func (s *Server) api(w http.ResponseWriter, r *http.Request, parts []string) {
 
 		writeJSON(w, http.StatusOK, vs)
 	case sub == "" && r.Method == http.MethodGet:
-		writeJSON(w, http.StatusOK, s.boardResponse(name))
+		writeJSON(w, http.StatusOK, s.boardResponse(name, images.Attach))
+	case sub == "images" && (r.Method == http.MethodGet || r.Method == http.MethodHead):
+		s.image(w, r, name, id)
 	case sub == "style" && r.Method == http.MethodPut:
 		s.putStyle(w, r, name)
 	case sub == "pos" && r.Method == http.MethodPut:

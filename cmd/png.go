@@ -25,6 +25,8 @@ func newPngCmd(a *App) *cobra.Command {
 				return err
 			}
 
+			warnBoardImages(a, rt, name)
+
 			if err := rt.control(a.Exe).Up(nil); err != nil {
 				return err
 			}

@@ -33,3 +33,10 @@ it('only what a reader sees counts: kind, group, icon and fields, not the card w
   expect(changedCards(before, signatures(board(card('a', 'A', { width: 400 }), card('b', 'B'))))).toBeNull();
   expect(changedCards(before, signatures(board(card('a', 'A', { kind: 'out' }), card('b', 'B'))))).toEqual(new Set(['a']));
 });
+
+it('a card whose picture changed glows, though its text did not', () => {
+  const pic = (sha256: string) => ({ image: { sha256 } });
+  const before = signatures(board(card('a', 'A', pic('one')), card('b', 'B', pic('two'))));
+  const now = signatures(board(card('a', 'A', pic('new')), card('b', 'B', pic('two'))));
+  expect(changedCards(before, now)).toEqual(new Set(['a']));
+});

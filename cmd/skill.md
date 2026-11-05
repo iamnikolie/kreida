@@ -226,6 +226,32 @@ Stripe, GitHub/GitLab, MySQL, Postgres, Redis, Qdrant, Slack, OpenAI/ChatGPT/GPT
 shows its logo. Force one with `icon: telegram` (brand keys: telegram gmail baserow gemini claude sheets drive
 calendar docs meet notion whatsapp instagram viber slack openai linkedin excel fibery …), turn it off with `icon: none`.
 
+Picture on a card: `image: <local path>` on a plain card or a note (not a table, not a pill). Shows on the canvas, in
+`kreida png`, `kreida export` and on share links, above the card's text. Default card width is 300 px; set `width:` for more.
+
+```yaml
+nodes:
+  shot: { title: Экран заказа, kind: out, image: img/order.png, width: 420 }   # next to the board file
+  logo: { title: Клиент, image: ~/work/acme/logo.webp }                        # or under home, or absolute
+```
+
+A relative path is relative to the directory of the board file (`kreida path <name>` shows it), never to where you run
+the command; `kreida set` reads stdin and does not know your directory. To keep a board portable, keep its images beside
+it and use relative paths. URLs are refused.
+
+Limits, checked when the file is read: PNG, JPEG, GIF or WebP judged by content, not by the file's name (SVG is refused:
+it can run scripts); a regular file (a link is followed and its target checked the same way, so a link to a text file is
+refused); at most 5 MiB and 40 megapixels per file, 25 MiB per board.
+
+A missing or refused file never fails a board. `kreida set`, `png`, `export` and `publish` name the card and the path on
+stderr and exit 0. Your own editor and `kreida png` draw a slot saying why; an export, a share link and a published board
+show the card without a picture and without the reason. Read stderr before you send a client an export.
+
+What leaves the machine: the path never does, in any JSON or file, only the bytes, as they are (a photo's EXIF stays in
+them). An export or a publish carries the bytes of any image the board names, so check where a board's paths point before
+you send it. On a published board only that board's images go up. A changed image file reaches the open page and, for a
+published board, the cloud within seconds, by the same route as a changed board.
+
 Inside `{ … }` quote any value that has a comma, colon or `|`: `text: "тема, описание"`.
 
 Layout is automatic (ELK). When an edge crosses a group border, the whole board flows in the board's

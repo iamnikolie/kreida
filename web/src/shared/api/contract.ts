@@ -13,7 +13,12 @@ export interface BNode {
   cols?: string[]; rows?: BCell[][];
   /** Its quadrant on a matrix board. */
   x?: Corner; y?: Corner;
+  /** Its picture. No path ever reaches the page: the hash names the bytes, the pixel size reserves the room. */
+  image?: BImage;
 }
+/** A card's picture, or, on the owner's own page only, why there is none. */
+export interface BImage { sha256?: string; type?: string; w?: number; h?: number; error?: ImageError }
+export type ImageError = 'missing' | 'unreadable' | 'unsupported' | 'too-big';
 export interface BCell { text: string; score?: number }
 export type Corner = 'low' | 'high';
 export interface BAxis { label: string; low: string; high: string }
@@ -39,6 +44,8 @@ export interface Board {
 export type Pos = Record<string, { x: number; y: number }>;
 export interface BoardResp {
   name: string; board?: Board; pos?: Pos; error?: string;
+  /** A standalone export only: the bytes of the board's images as `data:` addresses by hash. */
+  images?: Record<string, string>;
   /** Share link of kreida cloud only: the owner's display name in the link's language. Absent or empty = no name line. */
   owner?: string;
   /** Share link of kreida cloud only: the link takes comments from its holder. Absent = no composer. */

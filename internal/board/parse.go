@@ -14,7 +14,7 @@ import (
 var (
 	dirs     = map[string]bool{"LR": true, "RL": true, "TB": true, "BT": true}
 	nodeKeys = keySet("id", "title", "text", "kind", "group", "icon", "shape", "width", "step", "fields", "live", "cols",
-		"rows", "x", "y")
+		"rows", "x", "y", "image")
 	liveKeys  = keySet("cmd", "url", "every", "path", "label")
 	groupKeys = keySet("id", "label", "title", "kind", "direction", "parent", "nodes", "collapsed")
 	stepKeys  = keySet("title", "show", "hide")
@@ -301,8 +301,31 @@ func buildNode(id string, n *yaml.Node) Node {
 	}
 
 	node.X, node.Y = text(get(n, "x"), what+" x"), text(get(n, "y"), what+" y")
+	node.ImagePath = imagePath(&node, text(get(n, "image"), what+" image"))
 
 	return node
+}
+
+// imagePath checks an `image:` value. The file itself is not looked at here: parsing stays pure, and a board whose
+// file is missing still opens. The messages do not repeat the value: a share link shows a board's parse error.
+func imagePath(n *Node, path string) string {
+	if path == "" {
+		return ""
+	}
+
+	if strings.Contains(path, "://") || strings.HasPrefix(path, "data:") {
+		fail("node %s: image must be a local file path, not a URL", n.ID)
+	}
+
+	if n.Fields != nil || n.Rows != nil {
+		fail("node %s: image goes on a plain card, not a table", n.ID)
+	}
+
+	if n.Kind == "who" || (n.Shape != nil && *n.Shape == "pill") {
+		fail("node %s: image goes on a plain card, not a pill", n.ID)
+	}
+
+	return path
 }
 
 // buildTable reads a table card's `cols:` (header texts) and `rows:` (lists of cells). Rows are padded to the widest

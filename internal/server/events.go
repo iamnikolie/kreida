@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/iamnikolie/kreida/internal/images"
 )
 
 const (
@@ -64,6 +66,45 @@ func (s *Server) watch() (func(), error) {
 	}()
 
 	return func() { _ = w.Close() }, nil
+}
+
+// watchImages looks at the image files the boards name, wherever they live. A board whose image changed goes the road
+// of a board whose file changed (changed, then flush): the open pages hear of it, and the cloud syncer pushes it only
+// if the board is on the published list. Nothing about an image leaves by any other road.
+func (s *Server) watchImages() {
+	every := s.cfg.ImagePoll
+	if every <= 0 {
+		every = images.PollEvery
+	}
+
+	t := time.NewTicker(every)
+	defer t.Stop()
+
+	tracker := images.NewTracker()
+
+	look := func() {
+		entries, err := os.ReadDir(s.cfg.Paths.Dir)
+		if err != nil {
+			return
+		}
+
+		for _, e := range entries {
+			if name, ok := strings.CutSuffix(e.Name(), ".yaml"); ok && tracker.Changed(name, s.cfg.Paths.BoardFile(name), s.cfg.Paths.Dir) {
+				s.changed(e.Name())
+			}
+		}
+	}
+
+	look()
+
+	for {
+		select {
+		case <-t.C:
+			look()
+		case <-s.done:
+			return
+		}
+	}
 }
 
 // changed records a changed file and (re)starts the debounce timer.

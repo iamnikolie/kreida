@@ -5,6 +5,10 @@
   box-shadow: var(--shadow); color: var(--fg); transition: box-shadow .15s, transform .15s;
 }
 .card:hover { box-shadow: var(--shadow), 0 0 0 4px color-mix(in srgb, var(--edge) 18%, transparent); }
+.card.has-image { flex-direction: column; justify-content: center; gap: 8px; }
+.card .cimg { display: block; flex: none; width: 100%; border-radius: 8px; object-fit: contain; pointer-events: none; user-select: none; }
+.card .cimg.bad { display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;
+  border: 1.5px dashed var(--p2); color: var(--muted); font-size: 12px; line-height: 16px; }
 .card .row { display: flex; gap: 10px; align-items: flex-start; width: 100%; }
 .card .body { flex: 1; min-width: 0; text-align: center; }
 .card .ic { flex: none; margin-top: 2px; opacity: .85; }

@@ -4,10 +4,12 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/iamnikolie/kreida/internal/images"
 	"github.com/iamnikolie/kreida/internal/paths"
 )
 
-// shared is /api/share/<token>[/events|/live]: one board, read-only, reachable from other machines in LAN mode.
+// shared is /api/share/<token>[/events|/live|/images/<sha256>]: one board, read-only, reachable from other machines in
+// LAN mode.
 func (s *Server) shared(w http.ResponseWriter, r *http.Request, parts []string) {
 	token, sub := at(parts, 2), at(parts, 3)
 
@@ -31,6 +33,8 @@ func (s *Server) shared(w http.ResponseWriter, r *http.Request, parts []string) 
 		}
 
 		writeJSON(w, http.StatusOK, vs.WithoutSource())
+	case sub == "images" && (r.Method == http.MethodGet || r.Method == http.MethodHead):
+		s.image(w, r, name, at(parts, 4))
 	case sub != "" || r.Method != http.MethodGet:
 		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "read-only"})
 	default:
@@ -40,6 +44,6 @@ func (s *Server) shared(w http.ResponseWriter, r *http.Request, parts []string) 
 			return
 		}
 
-		writeJSON(w, http.StatusOK, s.boardResponse(name))
+		writeJSON(w, http.StatusOK, s.boardResponse(name, images.Public))
 	}
 }

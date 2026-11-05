@@ -10,6 +10,7 @@ import (
 
 	"github.com/iamnikolie/kreida/internal/board"
 	"github.com/iamnikolie/kreida/internal/history"
+	"github.com/iamnikolie/kreida/internal/images"
 	"github.com/iamnikolie/kreida/internal/paths"
 	"github.com/iamnikolie/kreida/internal/templates"
 	"github.com/spf13/cobra"
@@ -22,6 +23,29 @@ func arg(args []string, i int) string {
 	}
 
 	return ""
+}
+
+// warnImages tells the owner which cards have no picture and why. It names the paths, which is why it only ever goes
+// to the terminal.
+func warnImages(a *App, name string, problems []images.Problem) {
+	for _, p := range problems {
+		fmt.Fprintf(a.Err, "kreida: %s: %s\n", name, p)
+	}
+}
+
+// warnBoardImages is warnImages for the board in its file as it is now. A board that cannot be read has other news.
+func warnBoardImages(a *App, rt session, name string) {
+	text, err := os.ReadFile(rt.paths.BoardFile(name))
+	if err != nil {
+		return
+	}
+
+	b, err := board.Parse(string(text))
+	if err != nil {
+		return
+	}
+
+	warnImages(a, name, images.Attach(b, rt.paths.Dir).Problems)
 }
 
 // boardFile checks a board name and returns the path of its file.
@@ -222,6 +246,7 @@ func newSetCmd(a *App) *cobra.Command {
 				return err
 			}
 
+			warnBoardImages(a, rt, name)
 			fmt.Fprintln(a.Out, rt.boardURL(name, ""))
 
 			return nil

@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/iamnikolie/kreida/internal/images"
 	"github.com/iamnikolie/kreida/internal/live"
 	"github.com/iamnikolie/kreida/internal/notes"
 	"github.com/iamnikolie/kreida/internal/paths"
@@ -90,6 +91,16 @@ type APIError struct {
 func (e *APIError) Error() string {
 	return fmt.Sprintf("cloud: %s (HTTP %d)", e.Message, e.Status)
 }
+
+// MissingImagesError is the cloud refusing a board because it does not have the bytes of these images yet. Nothing was
+// stored: the board stays as it was until the images are up and the board comes again.
+type MissingImagesError struct {
+	APIError
+	SHA256 []string
+}
+
+// Unwrap lets IsStatus see the 409.
+func (e *MissingImagesError) Unwrap() error { return &e.APIError }
 
 // RateLimitError is a 429. RetryAfter is what the cloud asked for in Retry-After; zero when it did not say.
 type RateLimitError struct {
@@ -236,6 +247,16 @@ func failure(resp *http.Response, data []byte, errorFirst bool) error {
 		return &RateLimitError{RetryAfter: retryAfter(resp.Header.Get("Retry-After")), Message: msg}
 	}
 
+	if resp.StatusCode == http.StatusConflict {
+		var b struct {
+			Missing []string `json:"missing_images"`
+		}
+
+		if json.Unmarshal(data, &b) == nil && len(b.Missing) > 0 {
+			return &MissingImagesError{APIError: APIError{Status: resp.StatusCode, Message: msg}, SHA256: b.Missing}
+		}
+	}
+
 	return &APIError{Status: resp.StatusCode, Message: msg}
 }
 
@@ -321,6 +342,19 @@ func (c *Client) PushLive(ctx context.Context, name string, values map[string]Li
 	}
 
 	return c.call(ctx, http.MethodPut, "/api/cli/boards/"+escape(name)+"/live", body, nil)
+}
+
+// PutImage uploads the bytes of one image of a board, named by their hash. It is safe to repeat.
+func (c *Client) PutImage(ctx context.Context, name string, f images.File) error {
+	if err := ValidName(name); err != nil {
+		return err
+	}
+
+	if !images.ValidSHA(f.SHA256) {
+		return noRetry{errors.New("cloud.PutImage: bad image hash")}
+	}
+
+	return c.do(ctx, http.MethodPut, "/api/cli/boards/"+escape(name)+"/images/"+f.SHA256, f.Type, f.Bytes, nil, false)
 }
 
 // pngSignature starts every PNG; the cloud checks the leading bytes of a thumbnail for it.

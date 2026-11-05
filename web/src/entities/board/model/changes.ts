@@ -4,7 +4,7 @@ import type { Board } from '@shared/api';
 export type Signatures = Map<string, string>;
 
 export const signatures = (b: Board): Signatures =>
-  new Map(b.nodes.map(n => [n.id, JSON.stringify([n.title, n.text, n.kind, n.group, n.icon, n.fields])]));
+  new Map(b.nodes.map(n => [n.id, JSON.stringify([n.title, n.text, n.kind, n.group, n.icon, n.fields, n.image?.sha256 ?? n.image?.error])]));
 
 /**
  * The cards that differ between two versions of the same board, so the page can make them glow.

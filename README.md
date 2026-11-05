@@ -36,3 +36,29 @@ PNG export uses a local Chromium-based browser.
 ```
 
 Run `./kreida skill` for the YAML reference and `./kreida help` for commands.
+
+## Images on cards
+
+A card can show a local picture:
+
+```yaml
+nodes:
+  shot: { title: Order screen, image: img/order.png, width: 420 }
+```
+
+It appears on the canvas, in `kreida png`, in `kreida export`, and on share
+links. A relative path is resolved against the directory of the board file
+(`kreida path <name>`), so a board and its images can move together.
+
+PNG, JPEG, GIF, and WebP are accepted, judged by content rather than by file
+name. SVG is refused. A file must be a regular file of at most 5 MiB and 40
+megapixels, and a board holds at most 25 MiB of images. A symlink is followed
+and its target is checked the same way.
+
+A missing or refused file does not fail the board. The command names the card
+and the path on stderr. Your local editor and `kreida png` show why the
+picture is absent, while exports and share links show the card without it.
+
+A path never leaves your machine. The image bytes do, unchanged, including any
+EXIF data in a photo. A board can name any image you can read, so check its
+paths before you send an export or share a link.

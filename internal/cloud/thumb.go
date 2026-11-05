@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"time"
 
+	"github.com/iamnikolie/kreida/internal/images"
 	"github.com/iamnikolie/kreida/internal/paths"
 	"github.com/iamnikolie/kreida/internal/render"
 )
@@ -34,7 +35,12 @@ func ChromeThumbs(p paths.Paths, dist fs.FS) Renderer {
 			return nil, err
 		}
 
-		return render.Thumb(ctx, chrome, dist, render.Data{Name: name, Board: up.Board, Pos: up.Pos})
+		pic, err := render.Thumb(ctx, chrome, dist, render.Data{Name: name, Board: up.Board, Pos: up.Pos, Images: images.Set{Files: up.Images}.DataURLs()})
+		if err != nil {
+			return nil, err
+		}
+
+		return render.Shrink(pic, MaxThumb)
 	}
 }
 

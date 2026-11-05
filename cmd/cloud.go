@@ -8,9 +8,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/iamnikolie/kreida/internal/cloud"
+	"github.com/iamnikolie/kreida/internal/images"
 	"github.com/iamnikolie/kreida/internal/live"
 	"github.com/spf13/cobra"
 )
@@ -267,6 +269,8 @@ func newPublishCmd(a *App) *cobra.Command {
 				return hint(err)
 			}
 
+			warnBoardImages(a, rt, name)
+
 			if len(pub.Links) == 0 {
 				fmt.Fprintln(a.Err, "kreida: published, but the board has no link yet (make one in the cloud account)")
 			}
@@ -300,7 +304,7 @@ func newPublishCmd(a *App) *cobra.Command {
 	return c
 }
 
-// watchBoard feeds the syncer with the changes of one board's file and position file until ctx ends.
+// watchBoard feeds the syncer with the changes of one board's file, position file and image files until ctx ends.
 func watchBoard(ctx context.Context, errw io.Writer, rt session, sy *cloud.Syncer, name string) error {
 	w, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -316,10 +320,21 @@ func watchBoard(ctx context.Context, errw io.Writer, rt session, sy *cloud.Synce
 
 	sy.Start()
 
+	// image files may live anywhere: they are looked at, not watched
+	tracker := images.NewTracker()
+	tracker.Changed(name, rt.paths.BoardFile(name), rt.paths.Dir)
+
+	poll := time.NewTicker(images.PollEvery)
+	defer poll.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
 			return nil
+		case <-poll.C:
+			if tracker.Changed(name, rt.paths.BoardFile(name), rt.paths.Dir) {
+				sy.Changed(name)
+			}
 		case ev, ok := <-w.Events:
 			if !ok {
 				return nil

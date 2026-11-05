@@ -25,6 +25,8 @@ type Data struct {
 	Name  string          `json:"name"`
 	Board *board.Board    `json:"board"`
 	Pos   json.RawMessage `json:"pos"`
+	// Images holds the bytes of the board's images as `data:` addresses by hash: the file has no server to ask.
+	Images map[string]string `json:"images,omitempty"`
 }
 
 // HTML returns one HTML file holding the page with its script and styles inlined and the board in the data

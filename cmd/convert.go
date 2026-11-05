@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/iamnikolie/kreida/internal/board"
+	"github.com/iamnikolie/kreida/internal/images"
 	"github.com/iamnikolie/kreida/internal/mermaid"
 	"github.com/iamnikolie/kreida/internal/render"
 	"github.com/spf13/cobra"
@@ -62,7 +63,11 @@ func newExportCmd(a *App) *cobra.Command {
 				pos = data
 			}
 
-			html, err := render.HTML(a.Dist, render.Data{Name: name, Board: b, Pos: pos})
+			// the bytes go in the file, the paths stay here; the owner hears of a card that lost its picture
+			set := images.Public(b, rt.paths.Dir)
+			warnImages(a, name, set.Problems)
+
+			html, err := render.HTML(a.Dist, render.Data{Name: name, Board: b, Pos: pos, Images: set.DataURLs()})
 			if err != nil {
 				return err
 			}

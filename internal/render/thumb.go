@@ -1,9 +1,14 @@
 package render
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"image"
+	"image/color/palette"
+	"image/draw"
+	"image/png"
 	"io/fs"
 	"net/url"
 	"os"
@@ -55,6 +60,31 @@ func Thumb(ctx context.Context, chrome string, dist fs.FS, d Data) ([]byte, erro
 	}
 
 	return png, nil
+}
+
+// Shrink makes a PNG fit in limit bytes by going down to 256 colours, for a board whose photos make its thumbnail too
+// heavy. A picture of the thumbnail's size then cannot stay over the cloud's limit. A PNG that fits is returned as is.
+func Shrink(pic []byte, limit int) ([]byte, error) {
+	if len(pic) <= limit {
+		return pic, nil
+	}
+
+	src, err := png.Decode(bytes.NewReader(pic))
+	if err != nil {
+		return nil, fmt.Errorf("render.Shrink: %w", err)
+	}
+
+	dst := image.NewPaletted(src.Bounds(), palette.Plan9)
+	draw.FloydSteinberg.Draw(dst, src.Bounds(), src, src.Bounds().Min)
+
+	var out bytes.Buffer
+
+	enc := png.Encoder{CompressionLevel: png.BestCompression}
+	if err := enc.Encode(&out, dst); err != nil {
+		return nil, fmt.Errorf("render.Shrink: %w", err)
+	}
+
+	return out.Bytes(), nil
 }
 
 // thumbURL is the address of a page file with the query of `kreida png`: the whole board, no controls, light.

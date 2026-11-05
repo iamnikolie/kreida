@@ -26,6 +26,9 @@ const (
 	firstRetry  = 5 * time.Second
 	maxBackoff  = 5 * time.Minute
 	minLiveWait = time.Second
+
+	// maxImageRounds is how many times a board goes up in one push when the cloud keeps naming images it lacks.
+	maxImageRounds = 3
 )
 
 // ErrNotLoggedIn is returned when there is no token to publish with.
@@ -250,9 +253,13 @@ func (s *Syncer) push(ctx context.Context, cl *Client, name string, force bool) 
 		return Published{}, false, nil
 	}
 
-	pub, err := cl.Publish(ctx, name, body)
+	pub, err := s.upload(ctx, cl, name, up, body)
 	if err != nil {
 		return Published{}, false, err
+	}
+
+	for _, p := range up.Problems {
+		s.Log.Warn("cloud image", "board", name, "problem", p.String())
 	}
 
 	s.mu.Lock()
@@ -266,6 +273,44 @@ func (s *Syncer) push(ctx context.Context, cl *Client, name string, force bool) 
 	s.mu.Unlock()
 
 	return pub, true, nil
+}
+
+// upload puts the board up. The cloud refuses a board whose images it lacks and names them; those go up and the board
+// comes again, so a viewer never gets a board that points at bytes the cloud does not have, and a push that broke off
+// goes on where it stopped. Only bytes of this very board go: a hash the cloud names that is not on it is passed over,
+// so the cloud cannot ask for anything else on this machine.
+func (s *Syncer) upload(ctx context.Context, cl *Client, name string, up Upload, body []byte) (Published, error) {
+	for round := 1; ; round++ {
+		pub, err := cl.Publish(ctx, name, body)
+
+		var missing *MissingImagesError
+		if !errors.As(err, &missing) {
+			return pub, err
+		}
+
+		if round == maxImageRounds {
+			return Published{}, err
+		}
+
+		sent := 0
+
+		for _, sha := range missing.SHA256 {
+			f, ok := up.Images[sha]
+			if !ok {
+				continue
+			}
+
+			if err := cl.PutImage(ctx, name, f); err != nil {
+				return Published{}, err
+			}
+
+			sent++
+		}
+
+		if sent == 0 {
+			return Published{}, noRetry{err}
+		}
+	}
 }
 
 // Changed says a board's file or positions changed. It never blocks: the push happens after the quiet moment, and

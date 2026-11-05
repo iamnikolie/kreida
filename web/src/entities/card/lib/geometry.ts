@@ -30,6 +30,25 @@ export const PHONE_TABLE_MAX = 320;
 /** The lane caption above a card's title on a phone: its 14 px line and the 3 px gap (`.card .cap`). */
 const CAPTION = 17;
 
+/** A card's picture never stands taller than this: a tall one fits inside, whole. */
+export const IMAGE_MAX = 360;
+/** What stands in for a picture that cannot be shown. */
+export const IMAGE_BROKEN = 40;
+/** The gap between a picture and the text under it. */
+const IMAGE_GAP = 8;
+/** A card with a picture is wider than a card of text, or the picture says little. */
+const IMAGE_CARD = 300;
+/** The card's padding and borders around its picture (`.card` in card.css). */
+const IMAGE_INSET = 39;
+
+/** The height of a card's picture at the card's width, without the gap. */
+export function imageHeight(n: Pick<BNode, 'image'>, cardWidth: number): number {
+  if (!n.image) return 0;
+  if (n.image.error || !n.image.w || !n.image.h) return IMAGE_BROKEN;
+  return Math.min(IMAGE_MAX, Math.ceil(((cardWidth - IMAGE_INSET) * n.image.h) / n.image.w));
+}
+const imageRoom = (n: BNode, cardWidth: number) => (n.image ? imageHeight(n, cardWidth) + IMAGE_GAP : 0);
+
 export interface SizeOpts {
   /** A phone held upright: cards are narrower. */
   phone?: boolean;
@@ -57,7 +76,7 @@ export function size(n: BNode, { phone = false, caption = false }: SizeOpts = {}
   }
   if (n.kind === 'note' && n.text) {
     const width = Math.min(noteWidth(n), phone ? PHONE_TABLE_MAX : Infinity);
-    return { width, height: noteHeight(n, width) + (caption ? CAPTION : 0) };
+    return { width, height: noteHeight(n, width) + (caption ? CAPTION : 0) + imageRoom(n, width) };
   }
   const most = phone ? PHONE_CARD_MAX : Infinity, lines = (n: number) => (phone ? Math.min(n, 2) : n), extra = caption ? CAPTION : 0;
   if (n.kind === 'who' || n.shape === 'pill') {
@@ -67,10 +86,10 @@ export function size(n: BNode, { phone = false, caption = false }: SizeOpts = {}
     const chip = phone ? chipHeight(n, width - 40 - (hasIcon(n) ? 26 : 0), true) : 0; // a pill's chip counts on a phone, where a value must not drop
     return { width, height: (n.text ? 66 : 48) + (tl - 1) * 21 + chip + extra };
   }
-  const width = Math.min(n.width ?? (n.kind === 'note' ? 210 : 236), most);
+  const width = Math.min(n.width ?? (n.image ? IMAGE_CARD : n.kind === 'note' ? 210 : 236), most);
   const inner = width - 36 - (hasIcon(n) ? 28 : 0);
   const tl = lines(Math.max(1, Math.ceil((n.title.length * 8.9) / inner)));
   // on a phone the icon takes its column from the text too, and a column this narrow wastes a share of each line to word breaks
   const dl = n.text ? Math.ceil((n.text.length * 7.3) / ((width - 36 - (phone && hasIcon(n) ? 28 : 0)) * (phone ? 0.85 : 1))) : 0;
-  return { width, height: Math.max(58, 30 + tl * 21 + (dl ? 6 + dl * 18 : 0) + chipHeight(n, inner, phone) + extra) };
+  return { width, height: Math.max(58, 30 + tl * 21 + (dl ? 6 + dl * 18 : 0) + chipHeight(n, inner, phone) + extra) + imageRoom(n, width) };
 }

@@ -38,6 +38,10 @@ export const ru = {
   'error.layout': 'Не удалось разложить схему: {detail}',
   'error.undo': 'Не удалось отменить',
   // a live card
+  'card.image.missing': 'Файл не найден',
+  'card.image.unreadable': 'Файл не читается',
+  'card.image.unsupported': 'Не PNG, JPEG, GIF или WebP',
+  'card.image.too-big': 'Картинка слишком большая',
   'live.blocked': 'не разрешено',
   'live.error': 'ошибка',
   // the editor

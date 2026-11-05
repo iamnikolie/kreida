@@ -42,6 +42,8 @@ type Config struct {
 	Log  *slog.Logger
 	// Thumb draws the thumbnails of the boards published to kreida cloud; nil means headless Chrome showing Dist.
 	Thumb cloud.Renderer
+	// ImagePoll is how often the boards' image files are looked at; zero means images.PollEvery.
+	ImagePoll time.Duration
 }
 
 // Server serves boards from a directory.
@@ -125,6 +127,9 @@ func New(cfg Config) (*Server, error) {
 	}
 
 	s.stopWatch = stop
+
+	go s.watchImages()
+
 	s.cloud.Start()
 
 	return s, nil

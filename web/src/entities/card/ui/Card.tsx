@@ -5,6 +5,7 @@ import { SIDES, t, useBoardActions, useBoardT } from '@shared/lib';
 import { Glossed, Markdown, RoughBox } from '@shared/ui';
 import { iconFor } from '../lib/icon';
 import type { CardData, CardEdit } from '../model/types';
+import { CardImage } from './CardImage';
 import { Grid } from './Grid';
 import { Live } from './Live';
 import { Table } from './Table';
@@ -49,10 +50,11 @@ export const Card = memo(function Card({ id, data, width = 0, height = 0, edit }
   const editing = !!edit?.editing;
   const md = data.kind === 'note' && !editing && !!data.text;
   return (
-    <div className={`card k-${data.kind} ${data.shape ? `s-${data.shape}` : ''} ${data.branch != null ? `b-${data.branch % 5}` : ''} ${editing ? 'editing nodrag' : ''}`}
+    <div className={`card k-${data.kind} ${data.shape ? `s-${data.shape}` : ''} ${data.branch != null ? `b-${data.branch % 5}` : ''} ${editing ? 'editing nodrag' : ''} ${data.image ? 'has-image' : ''}`}
       onDoubleClick={edit?.start} onBlur={edit?.onBlur} onContextMenu={onContextMenu}>
       {rough}
       <Handle type="target" position={inPos} />
+      {data.image && <CardImage image={data.image} board={data.board} width={width} />}
       <div className="row">
         {Icon && <Icon className="ic" size={18} strokeWidth={1.8} />}
         <div className="body">

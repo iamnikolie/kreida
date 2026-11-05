@@ -89,6 +89,20 @@ type Node struct {
 	// X and Y place the card in a quadrant of `layout: matrix`: "low" or "high".
 	X string `json:"x,omitempty"`
 	Y string `json:"y,omitempty"`
+	// ImagePath is the board file's `image:` value. It stays on this machine: no JSON ever carries it.
+	ImagePath string `json:"-"`
+	// Image is the picture ImagePath led to, filled in by internal/images; Parse leaves it nil.
+	Image *Image `json:"image,omitempty"`
+}
+
+// Image is a card's picture as the page sees it: the hash that names its bytes and its size in pixels, or, on the
+// owner's own page only, the reason there is no picture. It has no path, by design.
+type Image struct {
+	SHA256 string `json:"sha256,omitempty"`
+	Type   string `json:"type,omitempty"`
+	W      int    `json:"w,omitempty"`
+	H      int    `json:"h,omitempty"`
+	Error  string `json:"error,omitempty"`
 }
 
 // Cell is a table cell; a score tints it (the table's lowest red, its highest green).

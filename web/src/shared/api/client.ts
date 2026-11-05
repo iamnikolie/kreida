@@ -16,6 +16,8 @@ export interface Api {
   list(): Promise<BoardItem[]>;
   /** One board with its saved card positions. `key` is the board name (the share token behind a share link). */
   board(key: string): Promise<BoardResp>;
+  /** Where the page gets the bytes of a card's image, by their hash. */
+  imageUrl(key: string, sha256: string): string;
   /** Calls back with the board key whenever a board changed on the server. Returns the unsubscribe. */
   events(onChange: (key: string) => void): () => void;
   /** Fetches the board's live card values now and then every `everySec`. Returns the stop function. */
@@ -67,6 +69,7 @@ function editorApi(page: PageMode): Api {
     inlined: null,
     list: () => getJson<BoardItem[]>('/api/boards'),
     board: n => getJson<BoardResp>(board(n)),
+    imageUrl: (n, sha) => `${board(n)}/images/${sha}`,
     events(onChange) {
       if (page.capture) return noop; // an open stream never lets a headless render go idle
       const es = new EventSource('/api/events');
@@ -105,6 +108,7 @@ function shareApi(page: PageMode): Api {
     inlined: null,
     list: async () => [],
     board: () => getJson<BoardResp>(`${root}?lang=${pageLocale()}`),
+    imageUrl: (_, sha) => `${root}/images/${sha}`,
     events(onChange) {
       if (page.capture) return noop;
       const es = new EventSource(`${root}/events`);
@@ -125,6 +129,7 @@ function staticApi(page: PageMode): Api {
     inlined: page.inlined,
     list: async () => [],
     board: async () => page.inlined!,
+    imageUrl: (_, sha) => page.inlined?.images?.[sha] ?? '',
     events: () => noop,
     watchLive: () => noop,
     notes: async () => [],
